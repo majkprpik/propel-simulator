@@ -14,6 +14,8 @@ export default {
         everflow: { DEFAULT: '#6366F1', dark: '#4f46e5' },
         shopify: { DEFAULT: '#96BF48', dark: '#7a9e35' },
         clickbank: { DEFAULT: '#C8A951', dark: '#a88c3d' },
+        cake: { DEFAULT: '#F97316', dark: '#EA6B10' },
+        hasoffers: { DEFAULT: '#0EA5E9', dark: '#0284C7' },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',

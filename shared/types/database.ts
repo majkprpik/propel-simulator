@@ -276,3 +276,101 @@ export interface CbPostbackConfig {
   is_active: boolean;
   created_at: string;
 }
+
+// ── Cake Types ────────────────────────────────────────────────────────────
+
+export interface CakeAccount {
+  id: string;
+  account_id: string;
+  name: string;
+  api_key: string;
+  domain: string;
+  status: string;
+  created_at: string;
+}
+
+export interface CakeOffer {
+  id: string;
+  account_id: string | null;
+  offer_id: number;
+  offer_name: string;
+  offer_status_id: number;
+  price_format_id: number;
+  price: number;
+  offer_link: string;
+  preview_link: string;
+  thankyou_link: string;
+  status: string;
+  created_at: string;
+}
+
+export interface CakeClick {
+  id: string;
+  click_id: string;
+  offer_id: number | null;
+  sub_id: string | null;
+  destination_url: string | null;
+  ip_address: string;
+  user_agent: string | null;
+  converted: boolean;
+  clicked_at: string;
+}
+
+export interface CakePostback {
+  id: string;
+  s1: string | null;
+  offer_id: string | null;
+  amount: number | null;
+  raw_query: string | null;
+  click_matched: boolean;
+  received_at: string;
+}
+
+// ── HasOffers Types ───────────────────────────────────────────────────────
+
+export interface HoAccount {
+  id: string;
+  account_id: string;
+  name: string;
+  network_id: string;
+  api_key: string;
+  status: string;
+  created_at: string;
+}
+
+export interface HoOffer {
+  id: string;
+  account_id: string | null;
+  offer_id: number;
+  name: string;
+  status: string;
+  preview_url: string;
+  offer_url: string;
+  default_payout: number;
+  default_payout_type: string;
+  currency: string;
+  description: string | null;
+  created_at: string;
+}
+
+export interface HoClick {
+  id: string;
+  click_id: string;
+  offer_id: number | null;
+  affiliate_id: string | null;
+  destination_url: string | null;
+  ip_address: string;
+  user_agent: string | null;
+  converted: boolean;
+  clicked_at: string;
+}
+
+export interface HoPostback {
+  id: string;
+  transaction_id: string | null;
+  offer_id: string | null;
+  payout: number | null;
+  raw_query: string | null;
+  click_matched: boolean;
+  received_at: string;
+}

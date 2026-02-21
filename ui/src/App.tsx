@@ -8,6 +8,8 @@ import {
   Network,
   Store,
   ShoppingBag,
+  Layers,
+  BarChart3,
   Settings
 } from 'lucide-react';
 
@@ -20,6 +22,8 @@ const platforms = [
   { name: 'Everflow', path: '/everflow', icon: Network, subtitle: 'Affiliate Network' },
   { name: 'Shopify', path: '/shopify', icon: Store, subtitle: 'eCommerce Webhooks' },
   { name: 'ClickBank', path: '/clickbank', icon: ShoppingBag, subtitle: 'Affiliate Network' },
+  { name: 'Cake', path: '/cake', icon: Layers, subtitle: 'Affiliate Network' },
+  { name: 'HasOffers', path: '/hasoffers', icon: BarChart3, subtitle: 'Affiliate Network' },
 ];
 
 export default function App() {

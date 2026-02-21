@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.dev.vars
+.wrangler/
+*.local
+.env
+.env.local
+.DS_Store
+.beads/
+.claude/
+supabase/.temp/
+*.tsbuildinfo

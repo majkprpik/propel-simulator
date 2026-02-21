@@ -11,6 +11,8 @@ const PLATFORM_PORTS: Record<Platform, number> = {
 const EVERFLOW_PORT = 8806;
 const SHOPIFY_PORT = 8807;
 const CLICKBANK_PORT = 8808;
+const CAKE_PORT = 8809;
+const HASOFFERS_PORT = 8810;
 
 function getEverflowBaseUrl(): string {
   if (import.meta.env.DEV) return '/api/everflow';
@@ -25,6 +27,16 @@ function getShopifyBaseUrl(): string {
 function getClickBankBaseUrl(): string {
   if (import.meta.env.DEV) return '/api/clickbank';
   return `http://localhost:${CLICKBANK_PORT}`;
+}
+
+function getCakeBaseUrl(): string {
+  if (import.meta.env.DEV) return '/api/cake';
+  return `http://localhost:${CAKE_PORT}`;
+}
+
+function getHasOffersBaseUrl(): string {
+  if (import.meta.env.DEV) return '/api/hasoffers';
+  return `http://localhost:${HASOFFERS_PORT}`;
 }
 
 async function fetchHelper<T>(baseUrl: string, path: string, options?: RequestInit): Promise<T> {
@@ -49,6 +61,14 @@ export async function shopifyFetch<T>(path: string, options?: RequestInit): Prom
 
 export async function clickbankFetch<T>(path: string, options?: RequestInit): Promise<T> {
   return fetchHelper<T>(getClickBankBaseUrl(), path, options);
+}
+
+export async function cakeFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  return fetchHelper<T>(getCakeBaseUrl(), path, options);
+}
+
+export async function hasoffersFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  return fetchHelper<T>(getHasOffersBaseUrl(), path, options);
 }
 
 function getBaseUrl(platform: Platform): string {

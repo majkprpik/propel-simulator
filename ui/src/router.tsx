@@ -78,6 +78,22 @@ import { EverflowClicksPage } from './platforms/everflow/EverflowClicksPage';
 import { EverflowPostbacksPage } from './platforms/everflow/EverflowPostbacksPage';
 import { EverflowSettingsPage } from './platforms/everflow/EverflowSettingsPage';
 
+// Cake
+import { CakeLayout } from './platforms/cake/CakeLayout';
+import { CakeDashboard } from './platforms/cake/CakeDashboard';
+import { CakeOffersPage } from './platforms/cake/CakeOffersPage';
+import { CakeClicksPage } from './platforms/cake/CakeClicksPage';
+import { CakePostbacksPage } from './platforms/cake/CakePostbacksPage';
+import { CakeSettingsPage } from './platforms/cake/CakeSettingsPage';
+
+// HasOffers
+import { HasOffersLayout } from './platforms/hasoffers/HasOffersLayout';
+import { HasOffersDashboard } from './platforms/hasoffers/HasOffersDashboard';
+import { HasOffersOffersPage } from './platforms/hasoffers/HasOffersOffersPage';
+import { HasOffersClicksPage } from './platforms/hasoffers/HasOffersClicksPage';
+import { HasOffersPostbacksPage } from './platforms/hasoffers/HasOffersPostbacksPage';
+import { HasOffersSettingsPage } from './platforms/hasoffers/HasOffersSettingsPage';
+
 // Admin
 import { AdminLayout } from './admin/AdminLayout';
 import { AdminOverview } from './admin/OverviewPage';
@@ -187,6 +203,28 @@ export const router = createBrowserRouter([
       { path: 'clicks', element: <EverflowClicksPage /> },
       { path: 'postbacks', element: <EverflowPostbacksPage /> },
       { path: 'settings', element: <EverflowSettingsPage /> },
+    ],
+  },
+  {
+    path: '/cake',
+    element: <CakeLayout />,
+    children: [
+      { path: 'dashboard', element: <CakeDashboard /> },
+      { path: 'offers', element: <CakeOffersPage /> },
+      { path: 'clicks', element: <CakeClicksPage /> },
+      { path: 'postbacks', element: <CakePostbacksPage /> },
+      { path: 'settings', element: <CakeSettingsPage /> },
+    ],
+  },
+  {
+    path: '/hasoffers',
+    element: <HasOffersLayout />,
+    children: [
+      { path: 'dashboard', element: <HasOffersDashboard /> },
+      { path: 'offers', element: <HasOffersOffersPage /> },
+      { path: 'clicks', element: <HasOffersClicksPage /> },
+      { path: 'postbacks', element: <HasOffersPostbacksPage /> },
+      { path: 'settings', element: <HasOffersSettingsPage /> },
     ],
   },
   {

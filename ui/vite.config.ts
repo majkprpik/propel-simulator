@@ -53,6 +53,16 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/clickbank/, ''),
       },
+      '/api/cake': {
+        target: 'http://localhost:8809',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/cake/, ''),
+      },
+      '/api/hasoffers': {
+        target: 'http://localhost:8810',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/hasoffers/, ''),
+      },
       '/capi/facebook': {
         target: 'http://localhost:8801',
         changeOrigin: true,

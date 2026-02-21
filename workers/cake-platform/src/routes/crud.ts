@@ -1,0 +1,234 @@
+import { Hono } from 'hono';
+import { getDb, type AppType } from '../index';
+
+export const crudRoutes = new Hono<AppType>();
+
+function generateClickId(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
+  const hex = Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+  return `cake_${hex}`;
+}
+
+function parsePagination(page: string | undefined, perPage: string | undefined) {
+  const p = Math.max(1, parseInt(page ?? '1', 10));
+  const pp = Math.min(100, Math.max(1, parseInt(perPage ?? '20', 10)));
+  return { page: p, perPage: pp, from: (p - 1) * pp, to: (p - 1) * pp + pp - 1 };
+}
+
+// ── Accounts ──────────────────────────────────────────────────────────────
+
+crudRoutes.get('/api/accounts', async (c) => {
+  const db = getDb(c);
+  const { data, error } = await db
+    .from('mock_cake_accounts')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ data, total: data?.length ?? 0 });
+});
+
+crudRoutes.post('/api/accounts', async (c) => {
+  const db = getDb(c);
+  const body = await c.req.json();
+  if (!body.name) {
+    return c.json({ error: 'name is required' }, 400);
+  }
+  const record = {
+    account_id: body.account_id || `cake_${crypto.randomUUID().slice(0, 8)}`,
+    name: body.name,
+    api_key: body.api_key || 'mock-cake-api-key',
+    domain: body.domain || 'simulator.cakemarketing.com',
+    status: body.status || 'active',
+  };
+  const { data, error } = await db.from('mock_cake_accounts').insert(record).select().single();
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ data }, 201);
+});
+
+crudRoutes.put('/api/accounts/:id', async (c) => {
+  const db = getDb(c);
+  const id = c.req.param('id');
+  const body = await c.req.json();
+  const updates: Record<string, unknown> = {};
+  if (body.name !== undefined) updates.name = body.name;
+  if (body.status !== undefined) updates.status = body.status;
+  if (body.api_key !== undefined) updates.api_key = body.api_key;
+  if (body.domain !== undefined) updates.domain = body.domain;
+  if (Object.keys(updates).length === 0) return c.json({ error: 'No fields to update' }, 400);
+  const { data, error } = await db
+    .from('mock_cake_accounts')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) {
+    if (error.code === 'PGRST116') return c.json({ error: 'Not found' }, 404);
+    return c.json({ error: error.message }, 500);
+  }
+  return c.json({ data });
+});
+
+// ── Offers ────────────────────────────────────────────────────────────────
+
+crudRoutes.get('/api/offers', async (c) => {
+  const db = getDb(c);
+  const pag = parsePagination(c.req.query('page'), c.req.query('perPage'));
+  const { data, count, error } = await db
+    .from('mock_cake_offers')
+    .select('*', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(pag.from, pag.to);
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ data: data ?? [], total: count ?? 0, page: pag.page, perPage: pag.perPage });
+});
+
+crudRoutes.post('/api/offers', async (c) => {
+  const db = getDb(c);
+  const body = await c.req.json();
+  if (!body.offer_name || !body.offer_link || !body.account_id) {
+    return c.json({ error: 'offer_name, offer_link, and account_id are required' }, 400);
+  }
+  const offerId = body.offer_id || Math.floor(Math.random() * 900000) + 100000;
+  const record = {
+    account_id: body.account_id,
+    offer_id: offerId,
+    offer_name: body.offer_name,
+    offer_status_id: body.offer_status_id ?? 1,
+    price_format_id: body.price_format_id ?? 1,
+    price: body.price ?? 5.00,
+    offer_link: body.offer_link,
+    preview_link: body.preview_link || 'https://example.com/preview',
+    thankyou_link: body.thankyou_link || 'https://example.com/thankyou',
+    status: body.status || 'active',
+  };
+  const { data, error } = await db.from('mock_cake_offers').insert(record).select().single();
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ data }, 201);
+});
+
+crudRoutes.put('/api/offers/:id', async (c) => {
+  const db = getDb(c);
+  const id = c.req.param('id');
+  const body = await c.req.json();
+  const updates: Record<string, unknown> = {};
+  if (body.offer_name !== undefined) updates.offer_name = body.offer_name;
+  if (body.offer_link !== undefined) updates.offer_link = body.offer_link;
+  if (body.preview_link !== undefined) updates.preview_link = body.preview_link;
+  if (body.thankyou_link !== undefined) updates.thankyou_link = body.thankyou_link;
+  if (body.price !== undefined) updates.price = body.price;
+  if (body.price_format_id !== undefined) updates.price_format_id = body.price_format_id;
+  if (body.offer_status_id !== undefined) updates.offer_status_id = body.offer_status_id;
+  if (body.status !== undefined) updates.status = body.status;
+  if (Object.keys(updates).length === 0) return c.json({ error: 'No fields to update' }, 400);
+  const { data, error } = await db
+    .from('mock_cake_offers')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) {
+    if (error.code === 'PGRST116') return c.json({ error: 'Not found' }, 404);
+    return c.json({ error: error.message }, 500);
+  }
+  return c.json({ data });
+});
+
+crudRoutes.delete('/api/offers/:id', async (c) => {
+  const db = getDb(c);
+  const id = c.req.param('id');
+  const { data, error } = await db
+    .from('mock_cake_offers')
+    .delete()
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) {
+    if (error.code === 'PGRST116') return c.json({ error: 'Not found' }, 404);
+    return c.json({ error: error.message }, 500);
+  }
+  return c.json({ data });
+});
+
+// ── Clicks ────────────────────────────────────────────────────────────────
+
+crudRoutes.get('/api/clicks', async (c) => {
+  const db = getDb(c);
+  const pag = parsePagination(c.req.query('page'), c.req.query('perPage'));
+  const { data, count, error } = await db
+    .from('mock_cake_clicks')
+    .select('*, mock_cake_offers(offer_name)', { count: 'exact' })
+    .order('clicked_at', { ascending: false })
+    .range(pag.from, pag.to);
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ data: data ?? [], total: count ?? 0, page: pag.page, perPage: pag.perPage });
+});
+
+crudRoutes.post('/api/clicks/generate', async (c) => {
+  const db = getDb(c);
+  const body = await c.req.json();
+  const count = Math.min(100, Math.max(1, Number(body.count ?? 1)));
+  const offerId: number | null = body.offer_id || null;
+
+  // Verify offer exists if specified
+  if (offerId) {
+    const { data: offer } = await db
+      .from('mock_cake_offers')
+      .select('offer_id, offer_link')
+      .eq('offer_id', offerId)
+      .single();
+    if (!offer) return c.json({ error: 'Offer not found' }, 404);
+  }
+
+  const clicks = Array.from({ length: count }, () => ({
+    click_id: generateClickId(),
+    offer_id: offerId,
+    sub_id: body.sub_id || null,
+    destination_url: body.destination_url || 'https://example.com/lander',
+    ip_address: body.ip_address || '1.2.3.4',
+    user_agent: body.user_agent || 'Mozilla/5.0 (Simulator)',
+    converted: false,
+  }));
+
+  const { data, error } = await db.from('mock_cake_clicks').insert(clicks).select();
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ data, generated: count }, 201);
+});
+
+crudRoutes.delete('/api/clicks/:id', async (c) => {
+  const db = getDb(c);
+  const id = c.req.param('id');
+  const { data, error } = await db
+    .from('mock_cake_clicks')
+    .delete()
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) {
+    if (error.code === 'PGRST116') return c.json({ error: 'Not found' }, 404);
+    return c.json({ error: error.message }, 500);
+  }
+  return c.json({ data });
+});
+
+// ── Postbacks ─────────────────────────────────────────────────────────────
+
+crudRoutes.get('/api/postbacks', async (c) => {
+  const db = getDb(c);
+  const pag = parsePagination(c.req.query('page'), c.req.query('perPage'));
+  const { data, count, error } = await db
+    .from('mock_cake_postbacks')
+    .select('*', { count: 'exact' })
+    .order('received_at', { ascending: false })
+    .range(pag.from, pag.to);
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ data: data ?? [], total: count ?? 0, page: pag.page, perPage: pag.perPage });
+});
+
+crudRoutes.delete('/api/postbacks', async (c) => {
+  const db = getDb(c);
+  const { error } = await db.from('mock_cake_postbacks').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ status: 'cleared' });
+});

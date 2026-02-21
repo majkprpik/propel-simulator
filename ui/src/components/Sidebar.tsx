@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import type { LucideIcon } from 'lucide-react';
-import { Facebook, Chrome, Music, Camera, Newspaper, Network, ShoppingBag, Store, ChevronDown, Home } from 'lucide-react';
+import { Facebook, Chrome, Music, Camera, Newspaper, Network, ShoppingBag, Store, Layers, BarChart3, ChevronDown, Home } from 'lucide-react';
 import type { Platform } from './PlatformLayout';
 
 export interface NavItem {
@@ -27,6 +27,8 @@ const platformHeaderStyles: Record<Platform, string> = {
   everflow: 'bg-everflow/10 hover:bg-everflow/20 border-everflow/20',
   shopify: 'bg-shopify/10 hover:bg-shopify/20 border-shopify/20',
   clickbank: 'bg-clickbank/10 hover:bg-clickbank/20 border-clickbank/20',
+  cake: 'bg-cake/10 hover:bg-cake/20 border-cake/20',
+  hasoffers: 'bg-hasoffers/10 hover:bg-hasoffers/20 border-hasoffers/20',
 };
 
 const platformActiveStyles: Record<Platform, string> = {
@@ -38,6 +40,8 @@ const platformActiveStyles: Record<Platform, string> = {
   everflow: 'bg-everflow text-white',
   shopify: 'bg-shopify text-white',
   clickbank: 'bg-clickbank text-gray-900',
+  cake: 'bg-cake text-white',
+  hasoffers: 'bg-hasoffers text-white',
 };
 
 const platforms = [
@@ -50,6 +54,8 @@ const platforms = [
   { name: 'Everflow', path: '/everflow/dashboard', icon: Network },
   { name: 'Shopify', path: '/shopify/dashboard', icon: Store },
   { name: 'ClickBank', path: '/clickbank/dashboard', icon: ShoppingBag },
+  { name: 'Cake', path: '/cake/dashboard', icon: Layers },
+  { name: 'HasOffers', path: '/hasoffers/dashboard', icon: BarChart3 },
 ];
 
 export function Sidebar({ platform = 'facebook', platformName, platformIcon: PlatformIcon, navItems }: SidebarProps) {

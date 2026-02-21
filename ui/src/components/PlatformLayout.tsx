@@ -2,7 +2,7 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar, type NavItem } from './Sidebar';
 import type { LucideIcon } from 'lucide-react';
 
-export type Platform = 'facebook' | 'google' | 'tiktok' | 'snapchat' | 'newsbreak' | 'everflow' | 'shopify' | 'clickbank';
+export type Platform = 'facebook' | 'google' | 'tiktok' | 'snapchat' | 'newsbreak' | 'everflow' | 'shopify' | 'clickbank' | 'cake' | 'hasoffers';
 
 interface PlatformLayoutProps {
   platform?: Platform;
@@ -20,6 +20,8 @@ const platformBackgrounds: Record<Platform, string> = {
   everflow: 'bg-gradient-to-br from-everflow/5 via-background to-background',
   shopify: 'bg-gradient-to-br from-shopify/5 via-background to-background',
   clickbank: 'bg-gradient-to-br from-clickbank/5 via-background to-background',
+  cake: 'bg-gradient-to-br from-cake/5 via-background to-background',
+  hasoffers: 'bg-gradient-to-br from-hasoffers/5 via-background to-background',
 };
 
 export function PlatformLayout({ platform, platformName, platformIcon, navItems }: PlatformLayoutProps) {
