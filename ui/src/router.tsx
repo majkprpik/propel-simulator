@@ -55,6 +55,21 @@ import { SnapchatEvents } from './platforms/snapchat/EventsPage';
 import { SnapchatSettings } from './platforms/snapchat/SettingsPage';
 import { SnapchatFeed } from './platforms/snapchat/FeedPage';
 
+// Shopify
+import { ShopifyLayout } from './platforms/shopify/ShopifyLayout';
+import { ShopifyDashboard } from './platforms/shopify/ShopifyDashboard';
+import { ShopifyOrdersPage } from './platforms/shopify/ShopifyOrdersPage';
+import { ShopifyWebhooksPage } from './platforms/shopify/ShopifyWebhooksPage';
+import { ShopifySettingsPage } from './platforms/shopify/ShopifySettingsPage';
+
+// ClickBank
+import { ClickBankLayout } from './platforms/clickbank/ClickBankLayout';
+import { ClickBankDashboard } from './platforms/clickbank/ClickBankDashboard';
+import { ClickBankProductsPage } from './platforms/clickbank/ClickBankProductsPage';
+import { ClickBankOrdersPage } from './platforms/clickbank/ClickBankOrdersPage';
+import { ClickBankPostbacksPage } from './platforms/clickbank/ClickBankPostbacksPage';
+import { ClickBankSettingsPage } from './platforms/clickbank/ClickBankSettingsPage';
+
 // Everflow
 import { EverflowLayout } from './platforms/everflow/EverflowLayout';
 import { EverflowDashboard } from './platforms/everflow/EverflowDashboard';
@@ -140,6 +155,27 @@ export const router = createBrowserRouter([
       { path: 'pixels', element: <SnapchatPixels /> },
       { path: 'events', element: <SnapchatEvents /> },
       { path: 'settings', element: <SnapchatSettings /> },
+    ],
+  },
+  {
+    path: '/shopify',
+    element: <ShopifyLayout />,
+    children: [
+      { path: 'dashboard', element: <ShopifyDashboard /> },
+      { path: 'orders', element: <ShopifyOrdersPage /> },
+      { path: 'webhooks', element: <ShopifyWebhooksPage /> },
+      { path: 'settings', element: <ShopifySettingsPage /> },
+    ],
+  },
+  {
+    path: '/clickbank',
+    element: <ClickBankLayout />,
+    children: [
+      { path: 'dashboard', element: <ClickBankDashboard /> },
+      { path: 'products', element: <ClickBankProductsPage /> },
+      { path: 'orders', element: <ClickBankOrdersPage /> },
+      { path: 'postbacks', element: <ClickBankPostbacksPage /> },
+      { path: 'settings', element: <ClickBankSettingsPage /> },
     ],
   },
   {

@@ -9,17 +9,26 @@ const PLATFORM_PORTS: Record<Platform, number> = {
 };
 
 const EVERFLOW_PORT = 8806;
+const SHOPIFY_PORT = 8807;
+const CLICKBANK_PORT = 8808;
 
 function getEverflowBaseUrl(): string {
-  if (import.meta.env.DEV) {
-    return '/api/everflow';
-  }
+  if (import.meta.env.DEV) return '/api/everflow';
   return `http://localhost:${EVERFLOW_PORT}`;
 }
 
-export async function everflowFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const url = `${getEverflowBaseUrl()}${path}`;
-  const res = await fetch(url, {
+function getShopifyBaseUrl(): string {
+  if (import.meta.env.DEV) return '/api/shopify';
+  return `http://localhost:${SHOPIFY_PORT}`;
+}
+
+function getClickBankBaseUrl(): string {
+  if (import.meta.env.DEV) return '/api/clickbank';
+  return `http://localhost:${CLICKBANK_PORT}`;
+}
+
+async function fetchHelper<T>(baseUrl: string, path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`${baseUrl}${path}`, {
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     ...options,
   });
@@ -28,6 +37,18 @@ export async function everflowFetch<T>(path: string, options?: RequestInit): Pro
     throw new Error((error as { error?: string }).error || `Request failed: ${res.status}`);
   }
   return res.json();
+}
+
+export async function everflowFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  return fetchHelper<T>(getEverflowBaseUrl(), path, options);
+}
+
+export async function shopifyFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  return fetchHelper<T>(getShopifyBaseUrl(), path, options);
+}
+
+export async function clickbankFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  return fetchHelper<T>(getClickBankBaseUrl(), path, options);
 }
 
 function getBaseUrl(platform: Platform): string {

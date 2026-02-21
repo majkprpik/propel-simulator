@@ -163,3 +163,116 @@ export interface EfPostbackConfig {
   is_active: boolean;
   created_at: string;
 }
+
+// ── Shopify Types ─────────────────────────────────────────────────────────
+
+export interface ShopifyShop {
+  id: string;
+  shop_domain: string;
+  access_token: string;
+  webhook_secret: string;
+  status: string;
+  created_at: string;
+}
+
+export interface ShopifyOrder {
+  id: string;
+  shop_domain: string | null;
+  order_id: number;
+  order_number: string;
+  email: string | null;
+  total_price: number;
+  currency: string;
+  checkout_token: string | null;
+  landing_site: string | null;
+  referring_site: string | null;
+  source_name: string;
+  financial_status: string;
+  line_items: unknown[];
+  customer: Record<string, unknown>;
+  webhook_fired_at: string | null;
+  webhook_target_url: string | null;
+  created_at: string;
+}
+
+export interface ShopifyWebhookLog {
+  id: string;
+  order_id: number | null;
+  shop_domain: string | null;
+  target_url: string;
+  topic: string;
+  payload: Record<string, unknown>;
+  response_status: number | null;
+  response_body: string | null;
+  fired_at: string;
+}
+
+// ── ClickBank Types ───────────────────────────────────────────────────────
+
+export interface CbAccount {
+  id: string;
+  account_id: string;
+  nickname: string;
+  api_key: string;
+  dev_key: string;
+  status: string;
+  created_at: string;
+}
+
+export interface CbProduct {
+  id: string;
+  account_id: string | null;
+  site: string;
+  item: string;
+  title: string;
+  description: string | null;
+  price: number;
+  currency: string;
+  category: string;
+  gravity: number;
+  commission_rate: number;
+  hoplink: string;
+  status: string;
+  created_at: string;
+}
+
+export interface CbOrder {
+  id: string;
+  account_id: string | null;
+  receipt: string;
+  cb_order_id: string;
+  product_site: string | null;
+  product_item: string | null;
+  affiliate_id: string | null;
+  amount: number;
+  currency: string;
+  customer_email: string | null;
+  status: string;
+  cbpop: string | null;
+  postback_received: boolean;
+  created_at: string;
+}
+
+export interface CbPostback {
+  id: string;
+  receipt: string | null;
+  cb_order_id: string | null;
+  product_site: string | null;
+  product_item: string | null;
+  affiliate_id: string | null;
+  amount: number | null;
+  cbpop: string | null;
+  raw_query: string | null;
+  order_matched: boolean;
+  received_at: string;
+}
+
+export interface CbPostbackConfig {
+  id: string;
+  account_id: string | null;
+  name: string;
+  postback_url: string;
+  event_name: string;
+  is_active: boolean;
+  created_at: string;
+}

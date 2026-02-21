@@ -12,6 +12,8 @@ export default {
         newsbreak: { DEFAULT: '#E53E3E', dark: '#c53030' },
         snapchat: { DEFAULT: '#FFFC00', dark: '#e6e300' },
         everflow: { DEFAULT: '#6366F1', dark: '#4f46e5' },
+        shopify: { DEFAULT: '#96BF48', dark: '#7a9e35' },
+        clickbank: { DEFAULT: '#C8A951', dark: '#a88c3d' },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',

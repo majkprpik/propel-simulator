@@ -43,6 +43,16 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/everflow/, ''),
       },
+      '/api/shopify': {
+        target: 'http://localhost:8807',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/shopify/, ''),
+      },
+      '/api/clickbank': {
+        target: 'http://localhost:8808',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/clickbank/, ''),
+      },
       '/capi/facebook': {
         target: 'http://localhost:8801',
         changeOrigin: true,

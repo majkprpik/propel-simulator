@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import type { LucideIcon } from 'lucide-react';
-import { Facebook, Chrome, Music, Camera, Newspaper, Network, ChevronDown, Home } from 'lucide-react';
+import { Facebook, Chrome, Music, Camera, Newspaper, Network, ShoppingBag, Store, ChevronDown, Home } from 'lucide-react';
 import type { Platform } from './PlatformLayout';
 
 export interface NavItem {
@@ -25,6 +25,8 @@ const platformHeaderStyles: Record<Platform, string> = {
   snapchat: 'bg-snapchat/10 hover:bg-snapchat/20 border-snapchat/20',
   newsbreak: 'bg-newsbreak/10 hover:bg-newsbreak/20 border-newsbreak/20',
   everflow: 'bg-everflow/10 hover:bg-everflow/20 border-everflow/20',
+  shopify: 'bg-shopify/10 hover:bg-shopify/20 border-shopify/20',
+  clickbank: 'bg-clickbank/10 hover:bg-clickbank/20 border-clickbank/20',
 };
 
 const platformActiveStyles: Record<Platform, string> = {
@@ -34,6 +36,8 @@ const platformActiveStyles: Record<Platform, string> = {
   snapchat: 'bg-snapchat text-gray-900',
   newsbreak: 'bg-newsbreak text-white',
   everflow: 'bg-everflow text-white',
+  shopify: 'bg-shopify text-white',
+  clickbank: 'bg-clickbank text-gray-900',
 };
 
 const platforms = [
@@ -44,6 +48,8 @@ const platforms = [
   { name: 'Snapchat', path: '/snapchat/dashboard', icon: Camera },
   { name: 'NewsBreak', path: '/newsbreak/dashboard', icon: Newspaper },
   { name: 'Everflow', path: '/everflow/dashboard', icon: Network },
+  { name: 'Shopify', path: '/shopify/dashboard', icon: Store },
+  { name: 'ClickBank', path: '/clickbank/dashboard', icon: ShoppingBag },
 ];
 
 export function Sidebar({ platform = 'facebook', platformName, platformIcon: PlatformIcon, navItems }: SidebarProps) {

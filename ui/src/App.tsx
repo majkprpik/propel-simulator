@@ -6,6 +6,8 @@ import {
   Newspaper,
   Ghost,
   Network,
+  Store,
+  ShoppingBag,
   Settings
 } from 'lucide-react';
 
@@ -16,6 +18,8 @@ const platforms = [
   { name: 'NewsBreak', path: '/newsbreak', icon: Newspaper, subtitle: 'Mock API' },
   { name: 'Snapchat', path: '/snapchat', icon: Ghost, subtitle: 'Mock API' },
   { name: 'Everflow', path: '/everflow', icon: Network, subtitle: 'Affiliate Network' },
+  { name: 'Shopify', path: '/shopify', icon: Store, subtitle: 'eCommerce Webhooks' },
+  { name: 'ClickBank', path: '/clickbank', icon: ShoppingBag, subtitle: 'Affiliate Network' },
 ];
 
 export default function App() {
