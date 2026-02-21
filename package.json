@@ -1,0 +1,31 @@
+{
+  "name": "propel-simulator",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "ui",
+    "workers/*",
+    "shared",
+    "scripts"
+  ],
+  "scripts": {
+    "dev:ui": "npm run dev -w ui",
+    "dev:facebook": "npm run dev -w workers/facebook-platform",
+    "dev:google": "npm run dev -w workers/google-platform",
+    "dev:tiktok": "npm run dev -w workers/tiktok-platform",
+    "dev:newsbreak": "npm run dev -w workers/newsbreak-platform",
+    "dev:snapchat": "npm run dev -w workers/snapchat-platform",
+    "dev:everflow": "npm run dev -w workers/everflow-platform",
+    "dev:workers": "concurrently \"npm:dev:facebook\" \"npm:dev:google\" \"npm:dev:tiktok\" \"npm:dev:newsbreak\" \"npm:dev:snapchat\" \"npm:dev:everflow\"",
+    "dev": "concurrently \"npm:dev:ui\" \"npm:dev:workers\"",
+    "build": "npm run build -w ui",
+    "type-check": "npm run type-check --workspaces --if-present",
+    "seed": "npm run seed -w propel-simulator-scripts --",
+    "seed:status": "npm run seed -w propel-simulator-scripts -- status",
+    "seed:clear": "npm run seed -w propel-simulator-scripts -- clear --all"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "typescript": "^5.7.0"
+  }
+}

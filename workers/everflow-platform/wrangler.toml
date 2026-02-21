@@ -1,0 +1,15 @@
+name = "everflow-platform"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# For local development, create a .dev.vars file with:
+# SUPABASE_URL=https://your-project.supabase.co
+# SUPABASE_SERVICE_KEY=your-service-role-key
+
+# For production deployment, set secrets with:
+# npx wrangler secret put SUPABASE_URL
+# npx wrangler secret put SUPABASE_SERVICE_KEY
+
+[dev]
+port = 8806
+inspector_port = 9235

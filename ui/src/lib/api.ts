@@ -1,0 +1,205 @@
+import type { Platform } from '@shared/types/database';
+
+const PLATFORM_PORTS: Record<Platform, number> = {
+  facebook: 8801,
+  google: 8802,
+  tiktok: 8803,
+  newsbreak: 8804,
+  snapchat: 8805,
+};
+
+const EVERFLOW_PORT = 8806;
+
+function getEverflowBaseUrl(): string {
+  if (import.meta.env.DEV) {
+    return '/api/everflow';
+  }
+  return `http://localhost:${EVERFLOW_PORT}`;
+}
+
+export async function everflowFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  const url = `${getEverflowBaseUrl()}${path}`;
+  const res = await fetch(url, {
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    ...options,
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error((error as { error?: string }).error || `Request failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+function getBaseUrl(platform: Platform): string {
+  // In dev, use Vite proxy
+  if (import.meta.env.DEV) {
+    return `/api/${platform}`;
+  }
+  return `http://localhost:${PLATFORM_PORTS[platform]}/api`;
+}
+
+export async function platformFetch<T>(
+  platform: Platform,
+  path: string,
+  options?: RequestInit
+): Promise<T> {
+  const url = `${getBaseUrl(platform)}${path}`;
+  const res = await fetch(url, {
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    ...options,
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(error.error || `Request failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+// CRUD helpers
+export function listResource<T>(platform: Platform, resource: string) {
+  return platformFetch<{ data: T[]; total: number }>(platform, `/${resource}`);
+}
+
+export function createResource<T>(platform: Platform, resource: string, body: Record<string, unknown>) {
+  return platformFetch<{ data: T }>(platform, `/${resource}`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export function getEvents(platform: Platform, pixelId?: string) {
+  const path = pixelId ? `/events/${pixelId}` : '/events';
+  return platformFetch<{ data: unknown[]; total: number }>(platform, path);
+}
+
+export function listActiveAds(platform: Platform) {
+  return platformFetch<{ data: import('@shared/types/database').MockAd[]; total: number }>(
+    platform,
+    '/ads?status=ACTIVE'
+  );
+}
+
+export async function sendConversionEvent({
+  platform,
+  pixel,
+  clickId,
+  eventName,
+  value,
+  currency,
+}: {
+  platform: Platform;
+  pixel: { pixel_id: string; access_token: string | null; ad_account_id: string };
+  clickId: string;
+  eventName: string;
+  value?: number;
+  currency?: string;
+}) {
+  const now = Math.floor(Date.now() / 1000);
+
+  switch (platform) {
+    case 'facebook': {
+      const capiUrl = `/capi/facebook/v18.0/${pixel.pixel_id}/events`;
+      const res = await fetch(capiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: [
+            {
+              event_name: eventName,
+              event_time: now,
+              event_id: crypto.randomUUID(),
+              action_source: 'website',
+              user_data: { fbc: clickId },
+              custom_data: value != null ? { value, currency: currency || 'USD' } : undefined,
+            },
+          ],
+          access_token: pixel.access_token,
+        }),
+      });
+      return res.json();
+    }
+
+    case 'google': {
+      const accountId = pixel.ad_account_id || 'unknown';
+      const capiUrl = `/capi/google/v17/customers/${accountId}:uploadClickConversions`;
+      const res = await fetch(capiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${pixel.access_token || 'mock-token'}`,
+          'developer-token': 'mock-developer-token',
+        },
+        body: JSON.stringify({
+          conversions: [
+            {
+              conversionAction: pixel.pixel_id,
+              gclid: clickId,
+              conversionValue: value,
+              conversionDateTime: new Date().toISOString(),
+              currencyCode: currency || 'USD',
+            },
+          ],
+        }),
+      });
+      return res.json();
+    }
+
+    case 'tiktok': {
+      const capiUrl = `/capi/tiktok/open_api/v1.3/event/track/`;
+      const res = await fetch(capiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Token': pixel.access_token || 'mock-token',
+        },
+        body: JSON.stringify({
+          pixel_id: pixel.pixel_id,
+          data: [
+            {
+              event_name: eventName,
+              event_id: crypto.randomUUID(),
+              timestamp: now,
+              user_data: { ttclid: clickId },
+              properties: value != null ? { value, currency: currency || 'USD' } : undefined,
+            },
+          ],
+        }),
+      });
+      return res.json();
+    }
+
+    case 'snapchat': {
+      const capiUrl = `/capi/snapchat/v2/conversion`;
+      const res = await fetch(capiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${pixel.access_token || 'mock-token'}`,
+        },
+        body: JSON.stringify({
+          pixel_id: pixel.pixel_id,
+          event: eventName,
+          timestamp: now,
+          click_id: clickId,
+          price: value != null ? String(value) : undefined,
+          currency: currency || 'USD',
+        }),
+      });
+      return res.json();
+    }
+
+    case 'newsbreak': {
+      return platformFetch(platform, '/events', {
+        method: 'POST',
+        body: JSON.stringify({
+          pixel_id: pixel.pixel_id,
+          event_name: eventName,
+          event_time: now,
+          click_id: clickId,
+          value: value ?? null,
+          currency: currency || 'USD',
+        }),
+      });
+    }
+  }
+}
