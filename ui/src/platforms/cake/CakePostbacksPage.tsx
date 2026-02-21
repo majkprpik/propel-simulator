@@ -34,6 +34,8 @@ export function CakePostbacksPage() {
 
       {postbacks.isLoading ? (
         <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : postbacks.isError ? (
+        <p className="text-sm text-destructive">Failed to load: {postbacks.error?.message}</p>
       ) : (postbacks.data?.total ?? 0) === 0 ? (
         <div className="rounded-lg border border-dashed p-12 text-center">
           <p className="text-sm text-muted-foreground">No postbacks received yet.</p>

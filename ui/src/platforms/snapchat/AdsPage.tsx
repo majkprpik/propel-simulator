@@ -21,7 +21,7 @@ export function SnapchatAds() {
   const [adGroupId, setAdGroupId] = useState('');
 
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['snapchat', 'ads'],
     queryFn: () => listResource<MockAd>('snapchat', 'ads'),
   });
@@ -52,6 +52,8 @@ export function SnapchatAds() {
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : isError ? (
+        <p className="text-sm text-destructive">Failed to load: {(error as Error)?.message}</p>
       ) : (
         <DataTable columns={columns} data={(data?.data ?? []) as MockAd[]} />
       )}

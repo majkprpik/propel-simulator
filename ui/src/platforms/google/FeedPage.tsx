@@ -84,7 +84,11 @@ export function GoogleFeed() {
         </div>
         <p className="mb-4 text-xs text-muted-foreground">About 1,234,567 results (0.42 seconds)</p>
 
-        {activeAds.length === 0 && !ads.isLoading && (
+        {ads.isError ? (
+          <div className="mb-6 rounded-lg border border bg-card p-8 text-center">
+            <p className="text-sm text-destructive">Failed to load ads: {(ads.error as Error)?.message}</p>
+          </div>
+        ) : activeAds.length === 0 && !ads.isLoading && (
           <div className="mb-6 rounded-lg border border bg-card p-8 text-center">
             <p className="text-sm text-muted-foreground">No active ads. Create ads in the <a href="/google/ads" className="text-primary hover:underline">Ads page</a> to see them here.</p>
           </div>

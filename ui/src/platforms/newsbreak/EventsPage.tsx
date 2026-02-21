@@ -21,7 +21,11 @@ export function NewsBreakEvents() {
   return (
     <div>
       <h1 className="mb-6 text-2xl font-bold text-foreground">Events</h1>
-      {events.isLoading ? <p className="text-sm text-muted-foreground">Loading...</p> : (
+      {events.isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : events.isError ? (
+        <p className="text-sm text-destructive">Failed to load: {(events.error as Error)?.message}</p>
+      ) : (
         <>
           <DataTable columns={columns} data={(events.data?.data ?? []) as MockEvent[]} onRowClick={(row) => setExpandedRow(expandedRow === row.id ? null : row.id)} />
           {expandedRow && (() => {

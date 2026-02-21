@@ -1,22 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { hasoffersFetch } from '../../lib/api';
 import { StatsCard } from '../../components/StatsCard';
-
-interface HoOffer {
-  id: string;
-  offer_id: number;
-  name: string;
-  status: string;
-}
-
-interface HoPostback {
-  id: string;
-  transaction_id: string;
-  offer_id: string | null;
-  payout: number | null;
-  click_matched: boolean;
-  received_at: string;
-}
+import type { HoOffer, HoPostback } from '@shared/types/database';
 
 export function HasOffersDashboard() {
   const offers = useQuery({
@@ -51,6 +36,8 @@ export function HasOffersDashboard() {
       <h2 className="mb-4 text-lg font-semibold text-foreground">Recent Postbacks</h2>
       {postbacks.isLoading ? (
         <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : postbacks.isError ? (
+        <p className="text-sm text-destructive">Failed to load: {postbacks.error?.message}</p>
       ) : postbacks.data?.data.length === 0 ? (
         <p className="text-sm text-muted-foreground">No postbacks received yet.</p>
       ) : (

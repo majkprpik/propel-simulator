@@ -3,7 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cakeFetch } from '../../lib/api';
 import type { CakeAccount } from '@shared/types/database';
 
-const BASE_URL = 'http://localhost:8809';
+const CAKE_PORT = 8809;
+const BASE_URL = import.meta.env.DEV ? '/api/cake' : `http://localhost:${CAKE_PORT}`;
 
 export function CakeSettingsPage() {
   const qc = useQueryClient();
@@ -123,6 +124,8 @@ CAKE_API_KEY=${primaryAccount?.api_key ?? 'mock-cake-api-key'}`}
 
         {accounts.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading...</p>
+        ) : accounts.isError ? (
+          <p className="text-sm text-destructive">Failed to load: {accounts.error?.message}</p>
         ) : (accounts.data?.data ?? []).length === 0 ? (
           <p className="text-sm text-muted-foreground">No accounts. Add one or seed with <code className="rounded bg-muted px-1">npm run seed -- seed --platform cake</code></p>
         ) : (

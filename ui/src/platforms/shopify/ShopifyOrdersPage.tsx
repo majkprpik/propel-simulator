@@ -1,15 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-
-async function shopifyFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const base = import.meta.env.DEV ? '/api/shopify' : 'http://localhost:8807';
-  const res = await fetch(`${base}${path}`, {
-    ...options,
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-  });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
-}
+import { shopifyFetch } from '../../lib/api';
+import type { ShopifyShop } from '@shared/types/database';
 
 function randomHex(len: number): string {
   const bytes = crypto.getRandomValues(new Uint8Array(len));
@@ -20,12 +12,6 @@ function randomHex(len: number): string {
 
 function randomOrderId(): number {
   return Math.floor(1000000000 + Math.random() * 9000000000);
-}
-
-interface Shop {
-  id: string;
-  shop_domain: string;
-  status: string;
 }
 
 interface Order {
@@ -74,7 +60,7 @@ export function ShopifyOrdersPage() {
 
   const shops = useQuery({
     queryKey: ['shopify', 'shops'],
-    queryFn: () => shopifyFetch<{ data: Shop[] }>('/api/shops'),
+    queryFn: () => shopifyFetch<{ data: ShopifyShop[] }>('/api/shops'),
   });
 
   const orders = useQuery({
@@ -333,6 +319,8 @@ export function ShopifyOrdersPage() {
       {/* Orders Table */}
       {orders.isLoading ? (
         <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : orders.isError ? (
+        <p className="text-sm text-destructive">Failed to load: {orders.error?.message}</p>
       ) : (
         <div className="overflow-x-auto rounded-lg border">
           <table className="w-full text-sm">

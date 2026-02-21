@@ -1,24 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-
-async function shopifyFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const base = import.meta.env.DEV ? '/api/shopify' : 'http://localhost:8807';
-  const res = await fetch(`${base}${path}`, {
-    ...options,
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-  });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
-}
-
-interface Shop {
-  id: string;
-  shop_domain: string;
-  access_token: string;
-  webhook_secret: string;
-  status: string;
-  created_at: string;
-}
+import { shopifyFetch } from '../../lib/api';
+import type { ShopifyShop } from '@shared/types/database';
 
 export function ShopifySettingsPage() {
   const qc = useQueryClient();
@@ -32,7 +15,7 @@ export function ShopifySettingsPage() {
 
   const shops = useQuery({
     queryKey: ['shopify', 'shops'],
-    queryFn: () => shopifyFetch<{ data: Shop[] }>('/api/shops'),
+    queryFn: () => shopifyFetch<{ data: ShopifyShop[] }>('/api/shops'),
   });
 
   const createShop = useMutation({
@@ -130,6 +113,8 @@ export function ShopifySettingsPage() {
 
         {shops.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading...</p>
+        ) : shops.isError ? (
+          <p className="text-sm text-destructive">Failed to load: {shops.error?.message}</p>
         ) : (shops.data?.data ?? []).length === 0 ? (
           <p className="text-sm text-muted-foreground">
             No shops configured. Add a shop to get started.

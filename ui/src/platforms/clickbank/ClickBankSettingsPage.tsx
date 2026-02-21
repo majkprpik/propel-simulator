@@ -1,28 +1,10 @@
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { clickbankFetch } from './api';
+import { clickbankFetch } from '../../lib/api';
+import type { CbAccount, CbPostbackConfig } from '@shared/types/database';
 
-interface CbAccount {
-  id: string;
-  account_id: string;
-  nickname: string;
-  api_key: string;
-  dev_key: string;
-  status: string;
-  created_at: string;
-}
-
-interface CbPostbackConfig {
-  id: string;
-  account_id: string | null;
-  name: string;
-  postback_url: string;
-  event_name: string;
-  is_active: boolean;
-  created_at: string;
-}
-
-const BASE_URL = 'http://localhost:8808';
+const CLICKBANK_PORT = 8808;
+const BASE_URL = import.meta.env.DEV ? '/api/clickbank' : `http://localhost:${CLICKBANK_PORT}`;
 
 export function ClickBankSettingsPage() {
   const qc = useQueryClient();
@@ -111,6 +93,8 @@ export function ClickBankSettingsPage() {
 
         {accounts.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading...</p>
+        ) : accounts.isError ? (
+          <p className="text-sm text-destructive">Failed to load: {accounts.error?.message}</p>
         ) : (accounts.data?.data ?? []).length === 0 ? (
           <p className="text-sm text-muted-foreground">No accounts yet. Add one to get started.</p>
         ) : (

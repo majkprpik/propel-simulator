@@ -87,7 +87,11 @@ export function NewsBreakFeed() {
     <div>
       <h1 className="mb-6 text-2xl font-bold text-foreground">Feed</h1>
       <div className="mx-auto max-w-2xl space-y-3">
-        {activeAds.length === 0 && !ads.isLoading && (
+        {ads.isError ? (
+          <div className="rounded-lg border border bg-card p-8 text-center">
+            <p className="text-sm text-destructive">Failed to load ads: {(ads.error as Error)?.message}</p>
+          </div>
+        ) : activeAds.length === 0 && !ads.isLoading && (
           <div className="rounded-lg border border bg-card p-8 text-center">
             <p className="text-sm text-muted-foreground">No active ads. Create ads in the <a href="/newsbreak/ads" className="text-primary hover:underline">Ads page</a> to see them here.</p>
           </div>

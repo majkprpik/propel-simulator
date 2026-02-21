@@ -21,7 +21,7 @@ export function GoogleAdGroups() {
   const [bid, setBid] = useState('');
 
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['google', 'ad-groups'],
     queryFn: () => listResource<MockAdGroup>('google', 'ad-groups'),
   });
@@ -48,6 +48,8 @@ export function GoogleAdGroups() {
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : isError ? (
+        <p className="text-sm text-destructive">Failed to load: {(error as Error)?.message}</p>
       ) : (
         <DataTable columns={columns} data={(data?.data ?? []) as MockAdGroup[]} />
       )}

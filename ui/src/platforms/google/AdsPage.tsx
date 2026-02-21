@@ -21,7 +21,7 @@ export function GoogleAds() {
   const [adGroupId, setAdGroupId] = useState('');
 
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['google', 'ads'],
     queryFn: () => listResource<MockAd>('google', 'ads'),
   });
@@ -52,6 +52,8 @@ export function GoogleAds() {
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : isError ? (
+        <p className="text-sm text-destructive">Failed to load: {(error as Error)?.message}</p>
       ) : (
         <DataTable columns={columns} data={(data?.data ?? []) as MockAd[]} />
       )}

@@ -1,8 +1,9 @@
 import { Outlet } from 'react-router-dom';
 import { Sidebar, type NavItem } from './Sidebar';
 import type { LucideIcon } from 'lucide-react';
+import type { Platform } from '@shared/types/database';
 
-export type Platform = 'facebook' | 'google' | 'tiktok' | 'snapchat' | 'newsbreak' | 'everflow' | 'shopify' | 'clickbank' | 'cake' | 'hasoffers';
+export type { Platform };
 
 interface PlatformLayoutProps {
   platform?: Platform;

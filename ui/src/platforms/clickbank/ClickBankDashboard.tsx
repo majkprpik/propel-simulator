@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { StatsCard } from '../../components/StatsCard';
-import { clickbankFetch } from './api';
+import { clickbankFetch } from '../../lib/api';
 
 interface CbProduct {
   id: string;
@@ -60,6 +60,8 @@ export function ClickBankDashboard() {
       <h2 className="mb-4 text-lg font-semibold text-foreground">Recent Postbacks</h2>
       {postbacks.isLoading ? (
         <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : postbacks.isError ? (
+        <p className="text-sm text-destructive">Failed to load: {postbacks.error?.message}</p>
       ) : postbacks.data?.data.length === 0 ? (
         <p className="text-sm text-muted-foreground">No postbacks received yet.</p>
       ) : (

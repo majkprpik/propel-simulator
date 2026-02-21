@@ -1,14 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { hasoffersFetch } from '../../lib/api';
-
-interface HoPostback {
-  id: string;
-  transaction_id: string;
-  offer_id: string | null;
-  payout: number | null;
-  click_matched: boolean;
-  received_at: string;
-}
+import type { HoPostback } from '@shared/types/database';
 
 export function HasOffersPostbacksPage() {
   const qc = useQueryClient();
@@ -42,6 +34,8 @@ export function HasOffersPostbacksPage() {
 
       {postbacks.isLoading ? (
         <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : postbacks.isError ? (
+        <p className="text-sm text-destructive">Failed to load: {postbacks.error?.message}</p>
       ) : (postbacks.data?.total ?? 0) === 0 ? (
         <div className="rounded-lg border border-dashed p-12 text-center">
           <p className="text-sm text-muted-foreground">No postbacks received yet.</p>

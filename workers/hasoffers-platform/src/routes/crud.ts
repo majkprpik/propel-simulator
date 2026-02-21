@@ -230,3 +230,49 @@ crudRoutes.delete('/api/postbacks', async (c) => {
   if (error) return c.json({ error: error.message }, 500);
   return c.json({ status: 'cleared' });
 });
+
+// ── Postback Configs ──────────────────────────────────────────────────────
+
+crudRoutes.get('/api/postback-configs', async (c) => {
+  const db = getDb(c);
+  const { data, error } = await db
+    .from('mock_ho_postback_configs')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ data: data ?? [], total: data?.length ?? 0 });
+});
+
+crudRoutes.post('/api/postback-configs', async (c) => {
+  const db = getDb(c);
+  const body = await c.req.json();
+  if (!body.name || !body.postback_url) {
+    return c.json({ error: 'name and postback_url are required' }, 400);
+  }
+  const record = {
+    account_id: body.account_id || null,
+    name: body.name,
+    postback_url: body.postback_url,
+    event_name: body.event_name || 'conversion',
+    is_active: body.is_active ?? true,
+  };
+  const { data, error } = await db.from('mock_ho_postback_configs').insert(record).select().single();
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ data }, 201);
+});
+
+crudRoutes.delete('/api/postback-configs/:id', async (c) => {
+  const db = getDb(c);
+  const id = c.req.param('id');
+  const { data, error } = await db
+    .from('mock_ho_postback_configs')
+    .delete()
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) {
+    if (error.code === 'PGRST116') return c.json({ error: 'Not found' }, 404);
+    return c.json({ error: error.message }, 500);
+  }
+  return c.json({ data });
+});

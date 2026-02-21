@@ -1,4 +1,4 @@
-export type Platform = 'facebook' | 'google' | 'tiktok' | 'newsbreak' | 'snapchat';
+export type Platform = 'facebook' | 'google' | 'tiktok' | 'newsbreak' | 'snapchat' | 'everflow' | 'shopify' | 'clickbank' | 'cake' | 'hasoffers';
 
 export interface MockAdAccount {
   id: string;

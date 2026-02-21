@@ -47,6 +47,8 @@ export function FacebookEvents() {
 
       {events.isLoading ? (
         <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : events.isError ? (
+        <p className="text-sm text-destructive">Failed to load: {events.error?.message}</p>
       ) : (
         <>
           <DataTable

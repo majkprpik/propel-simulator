@@ -128,6 +128,8 @@ export function EverflowOffersPage() {
 
       {offers.isLoading ? (
         <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : offers.isError ? (
+        <p className="text-sm text-destructive">Failed to load: {offers.error?.message}</p>
       ) : (
         <div className="overflow-x-auto rounded-lg border">
           <table className="w-full text-sm">

@@ -138,6 +138,8 @@ HASOFFERS_NETWORK_TOKEN=${primaryAccount?.api_key ?? 'mock-ho-network-token'}`}
 
         {accounts.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading...</p>
+        ) : accounts.isError ? (
+          <p className="text-sm text-destructive">Failed to load: {accounts.error?.message}</p>
         ) : (accounts.data?.data ?? []).length === 0 ? (
           <p className="text-sm text-muted-foreground">No accounts. Click "Add Account" to create one.</p>
         ) : (

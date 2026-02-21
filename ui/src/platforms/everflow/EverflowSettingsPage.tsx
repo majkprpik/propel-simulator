@@ -3,7 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { everflowFetch } from '../../lib/api';
 import type { EfAccount, EfPostbackConfig } from '@shared/types/database';
 
-const BASE_URL = 'http://localhost:8806';
+const EVERFLOW_PORT = 8806;
+const BASE_URL = import.meta.env.DEV ? '/api/everflow' : `http://localhost:${EVERFLOW_PORT}`;
 
 export function EverflowSettingsPage() {
   const qc = useQueryClient();
@@ -102,6 +103,8 @@ EVERFLOW_API_KEY=${primaryAccount?.api_key ?? 'mock-ef-api-key'}`}
         <h2 className="mb-4 text-lg font-semibold">Network Accounts</h2>
         {accounts.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading...</p>
+        ) : accounts.isError ? (
+          <p className="text-sm text-destructive">Failed to load: {accounts.error?.message}</p>
         ) : (accounts.data?.data ?? []).length === 0 ? (
           <p className="text-sm text-muted-foreground">No accounts. Seed one with <code className="rounded bg-muted px-1">npm run seed -- seed --platform everflow</code></p>
         ) : (

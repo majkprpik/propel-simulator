@@ -21,7 +21,7 @@ export function FacebookAdSets() {
   const [bid, setBid] = useState('');
 
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['facebook', 'ad-groups'],
     queryFn: () => listResource<MockAdGroup>('facebook', 'ad-groups'),
   });
@@ -51,6 +51,8 @@ export function FacebookAdSets() {
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : isError ? (
+        <p className="text-sm text-destructive">Failed to load: {(error as Error)?.message}</p>
       ) : (
         <DataTable columns={columns} data={(data?.data ?? []) as MockAdGroup[]} />
       )}

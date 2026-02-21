@@ -22,7 +22,7 @@ export function NewsBreakCampaigns() {
   const [budget, setBudget] = useState('');
 
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery({ queryKey: ['newsbreak', 'campaigns'], queryFn: () => listResource<MockCampaign>('newsbreak', 'campaigns') });
+  const { data, isLoading, isError, error } = useQuery({ queryKey: ['newsbreak', 'campaigns'], queryFn: () => listResource<MockCampaign>('newsbreak', 'campaigns') });
 
   const create = useMutation({
     mutationFn: (body: Record<string, unknown>) => createResource('newsbreak', 'campaigns', body),
@@ -35,7 +35,13 @@ export function NewsBreakCampaigns() {
         <h1 className="text-2xl font-bold text-foreground">Campaigns</h1>
         <button onClick={() => setDialogOpen(true)} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90">+ New Campaign</button>
       </div>
-      {isLoading ? <p className="text-sm text-muted-foreground">Loading...</p> : <DataTable columns={columns} data={(data?.data ?? []) as MockCampaign[]} />}
+      {isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : isError ? (
+        <p className="text-sm text-destructive">Failed to load: {(error as Error)?.message}</p>
+      ) : (
+        <DataTable columns={columns} data={(data?.data ?? []) as MockCampaign[]} />
+      )}
       <FormDialog open={dialogOpen} onClose={() => setDialogOpen(false)} title="Create Campaign" onSubmit={() => create.mutate({ name, objective, daily_budget: budget ? Number(budget) : null })}>
         <label className="block"><span className="text-sm font-medium text-card-foreground">Name</span><input value={name} onChange={(e) => setName(e.target.value)} required className="mt-1 block w-full rounded-md border border px-3 py-2 text-sm focus:border-primary focus:outline-none" /></label>
         <label className="block"><span className="text-sm font-medium text-card-foreground">Objective</span><select value={objective} onChange={(e) => setObjective(e.target.value)} className="mt-1 block w-full rounded-md border border px-3 py-2 text-sm focus:border-primary focus:outline-none"><option>CONVERSIONS</option><option>TRAFFIC</option></select></label>

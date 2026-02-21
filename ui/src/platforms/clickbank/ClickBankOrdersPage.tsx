@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { clickbankFetch } from './api';
+import { clickbankFetch } from '../../lib/api';
 
 interface CbAccount {
   id: string;
@@ -169,6 +169,8 @@ export function ClickBankOrdersPage() {
 
       {orders.isLoading ? (
         <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : orders.isError ? (
+        <p className="text-sm text-destructive">Failed to load: {orders.error?.message}</p>
       ) : (
         <div className="overflow-x-auto rounded-lg border">
           <table className="w-full text-sm">

@@ -18,7 +18,13 @@ export function NewsBreakDashboard() {
         <StatsCard label="Clicks" value={clicks.data?.total ?? 0} />
       </div>
       <h2 className="mb-4 text-lg font-semibold text-foreground">Recent Events</h2>
-      {events.isLoading ? <p className="text-sm text-muted-foreground">Loading...</p> : <EventsTimeline events={(events.data?.data ?? []) as MockEvent[]} />}
+      {events.isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : events.isError ? (
+        <p className="text-sm text-destructive">Failed to load: {events.error?.message}</p>
+      ) : (
+        <EventsTimeline events={(events.data?.data ?? []) as MockEvent[]} />
+      )}
     </div>
   );
 }

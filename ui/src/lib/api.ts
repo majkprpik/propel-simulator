@@ -1,6 +1,6 @@
 import type { Platform } from '@shared/types/database';
 
-const PLATFORM_PORTS: Record<Platform, number> = {
+const PLATFORM_PORTS: Partial<Record<Platform, number>> = {
   facebook: 8801,
   google: 8802,
   tiktok: 8803,
@@ -76,7 +76,9 @@ function getBaseUrl(platform: Platform): string {
   if (import.meta.env.DEV) {
     return `/api/${platform}`;
   }
-  return `http://localhost:${PLATFORM_PORTS[platform]}/api`;
+  const port = PLATFORM_PORTS[platform];
+  if (port == null) throw new Error(`No port configured for platform: ${platform}`);
+  return `http://localhost:${port}/api`;
 }
 
 export async function platformFetch<T>(
@@ -242,5 +244,8 @@ export async function sendConversionEvent({
         }),
       });
     }
+
+    default:
+      throw new Error(`Conversion tracking not supported for platform: ${platform}`);
   }
 }

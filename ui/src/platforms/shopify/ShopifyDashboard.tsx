@@ -1,37 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
+import { shopifyFetch } from '../../lib/api';
 import { StatsCard } from '../../components/StatsCard';
-
-async function shopifyFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const base = import.meta.env.DEV ? '/api/shopify' : 'http://localhost:8807';
-  const res = await fetch(`${base}${path}`, {
-    ...options,
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-  });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
-}
-
-interface Shop {
-  id: string;
-  shop_domain: string;
-  status: string;
-}
-
-interface WebhookLogEntry {
-  id: string;
-  order_id: number;
-  shop_domain: string;
-  target_url: string;
-  topic: string;
-  response_status: number;
-  response_body: string;
-  fired_at: string;
-}
+import type { ShopifyShop, ShopifyWebhookLog } from '@shared/types/database';
 
 export function ShopifyDashboard() {
   const shops = useQuery({
     queryKey: ['shopify', 'shops'],
-    queryFn: () => shopifyFetch<{ data: Shop[]; total: number }>('/api/shops'),
+    queryFn: () => shopifyFetch<{ data: ShopifyShop[]; total: number }>('/api/shops'),
   });
 
   const orders = useQuery({
@@ -41,7 +16,7 @@ export function ShopifyDashboard() {
 
   const webhookLog = useQuery({
     queryKey: ['shopify', 'webhook-log'],
-    queryFn: () => shopifyFetch<{ data: WebhookLogEntry[]; total: number }>('/api/webhook-log'),
+    queryFn: () => shopifyFetch<{ data: ShopifyWebhookLog[]; total: number }>('/api/webhook-log'),
     refetchInterval: 5000,
   });
 
@@ -64,6 +39,8 @@ export function ShopifyDashboard() {
       <h2 className="mb-4 text-lg font-semibold text-foreground">Recent Webhook Activity</h2>
       {webhookLog.isLoading ? (
         <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : webhookLog.isError ? (
+        <p className="text-sm text-destructive">Failed to load: {webhookLog.error?.message}</p>
       ) : logEntries.length === 0 ? (
         <p className="text-sm text-muted-foreground">No webhooks fired yet.</p>
       ) : (
@@ -91,7 +68,7 @@ export function ShopifyDashboard() {
                   <td className="px-4 py-3">
                     <span
                       className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                        entry.response_status >= 200 && entry.response_status < 300
+                        entry.response_status != null && entry.response_status >= 200 && entry.response_status < 300
                           ? 'bg-green-100 text-green-700'
                           : 'bg-red-100 text-red-700'
                       }`}

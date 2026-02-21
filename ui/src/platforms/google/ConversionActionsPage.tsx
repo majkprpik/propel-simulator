@@ -20,7 +20,7 @@ export function GoogleConversionActions() {
   const [accountId, setAccountId] = useState('');
 
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['google', 'pixels'],
     queryFn: () => listResource<MockPixel>('google', 'pixels'),
   });
@@ -44,7 +44,13 @@ export function GoogleConversionActions() {
         </button>
       </div>
 
-      {isLoading ? <p className="text-sm text-muted-foreground">Loading...</p> : <DataTable columns={columns} data={(data?.data ?? []) as MockPixel[]} />}
+      {isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : isError ? (
+        <p className="text-sm text-destructive">Failed to load: {(error as Error)?.message}</p>
+      ) : (
+        <DataTable columns={columns} data={(data?.data ?? []) as MockPixel[]} />
+      )}
 
       <FormDialog open={dialogOpen} onClose={() => setDialogOpen(false)} title="Create Conversion Action" onSubmit={() => create.mutate({ name, ad_account_id: accountId })}>
         <label className="block">

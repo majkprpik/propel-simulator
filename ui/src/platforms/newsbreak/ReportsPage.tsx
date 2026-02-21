@@ -14,7 +14,7 @@ const columns: Column<NewsBreakReportItem>[] = [
 ];
 
 export function NewsBreakReports() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['newsbreak', 'reports'],
     queryFn: () => platformFetch<{ data: NewsBreakReportItem[] }>('newsbreak', '/reports'),
   });
@@ -24,6 +24,8 @@ export function NewsBreakReports() {
       <h1 className="mb-6 text-2xl font-bold text-foreground">Reports</h1>
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : isError ? (
+        <p className="text-sm text-destructive">Failed to load: {(error as Error)?.message}</p>
       ) : (
         <DataTable columns={columns} data={(data?.data ?? []) as NewsBreakReportItem[]} />
       )}

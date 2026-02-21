@@ -1,32 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-
-async function shopifyFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const base = import.meta.env.DEV ? '/api/shopify' : 'http://localhost:8807';
-  const res = await fetch(`${base}${path}`, {
-    ...options,
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-  });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
-}
-
-interface WebhookLogEntry {
-  id: string;
-  order_id: number;
-  shop_domain: string;
-  target_url: string;
-  topic: string;
-  response_status: number;
-  response_body: string;
-  fired_at: string;
-}
+import { shopifyFetch } from '../../lib/api';
+import type { ShopifyWebhookLog } from '@shared/types/database';
 
 export function ShopifyWebhooksPage() {
   const qc = useQueryClient();
 
   const webhookLog = useQuery({
     queryKey: ['shopify', 'webhook-log'],
-    queryFn: () => shopifyFetch<{ data: WebhookLogEntry[]; total: number }>('/api/webhook-log'),
+    queryFn: () => shopifyFetch<{ data: ShopifyWebhookLog[]; total: number }>('/api/webhook-log'),
     refetchInterval: 3000,
   });
 
@@ -59,6 +40,8 @@ export function ShopifyWebhooksPage() {
 
       {webhookLog.isLoading ? (
         <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : webhookLog.isError ? (
+        <p className="text-sm text-destructive">Failed to load: {webhookLog.error?.message}</p>
       ) : entries.length === 0 ? (
         <div className="rounded-lg border border-dashed p-12 text-center">
           <p className="text-sm text-muted-foreground">No webhooks fired yet.</p>
@@ -84,7 +67,7 @@ export function ShopifyWebhooksPage() {
                 <tr
                   key={entry.id}
                   className={`hover:bg-muted/30 ${
-                    entry.response_status >= 200 && entry.response_status < 300
+                    entry.response_status != null && entry.response_status >= 200 && entry.response_status < 300
                       ? 'bg-green-50/30'
                       : 'bg-red-50/30'
                   }`}
@@ -100,7 +83,7 @@ export function ShopifyWebhooksPage() {
                   <td className="px-4 py-3">
                     <span
                       className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                        entry.response_status >= 200 && entry.response_status < 300
+                        entry.response_status != null && entry.response_status >= 200 && entry.response_status < 300
                           ? 'bg-green-100 text-green-700'
                           : 'bg-red-100 text-red-700'
                       }`}

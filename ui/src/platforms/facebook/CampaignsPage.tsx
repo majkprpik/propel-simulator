@@ -22,7 +22,7 @@ export function FacebookCampaigns() {
   const [budget, setBudget] = useState('');
 
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['facebook', 'campaigns'],
     queryFn: () => listResource<MockCampaign>('facebook', 'campaigns'),
   });
@@ -52,6 +52,8 @@ export function FacebookCampaigns() {
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : isError ? (
+        <p className="text-sm text-destructive">Failed to load: {(error as Error)?.message}</p>
       ) : (
         <DataTable columns={columns} data={(data?.data ?? []) as MockCampaign[]} />
       )}
