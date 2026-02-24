@@ -21,7 +21,7 @@ export type CreateAccountInput = z.infer<typeof createAccountSchema>;
 
 // --- Campaign ---
 export const createCampaignSchema = z.object({
-  ad_account_id: z.string().min(1, 'ad_account_id is required'),
+  ad_account_id: z.string().optional(),
   name: z.string().min(1, 'Campaign name is required').max(255),
   objective: z.string().max(100).optional(),
   status: z.string().max(50).optional(),

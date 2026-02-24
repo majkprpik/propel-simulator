@@ -149,9 +149,25 @@ export function createCrudRoutes(options: CrudFactoryOptions): Hono<WorkerAppTyp
     if (!parsed.success) {
       return c.json({ error: 'Validation failed', details: formatZodErrors(parsed.error) }, 400);
     }
+
+    // Auto-resolve ad_account_id: use provided value or fetch first account for this platform
+    let adAccountId = parsed.data.ad_account_id;
+    if (!adAccountId) {
+      const { data: account } = await db
+        .from('mock_ad_accounts')
+        .select('id')
+        .eq('platform', platform)
+        .limit(1)
+        .single();
+      if (!account) {
+        return c.json({ error: 'No ad account found for this platform. Create an account first.' }, 400);
+      }
+      adAccountId = account.id;
+    }
+
     const record = {
       platform,
-      ad_account_id: parsed.data.ad_account_id,
+      ad_account_id: adAccountId,
       campaign_id: parsed.data.campaign_id || defaults.generateCampaignId(),
       name: parsed.data.name,
       objective: parsed.data.objective || defaults.campaignObjective,
