@@ -76,9 +76,11 @@ export function FacebookFeed() {
       });
       const clickId = (res.data as any).click_id;
 
-      // Register click in Propel (fire and forget)
+      // Register click in Propel via Vite proxy (avoids CORS)
       if (ad.destination_url) {
-        fetch(`${ad.destination_url}?fbclid=${encodeURIComponent(clickId)}`, { redirect: 'manual' })
+        const redirectorBase = import.meta.env.VITE_PROPEL_REDIRECTOR_URL || 'http://localhost:8790';
+        const proxyUrl = ad.destination_url.replace(redirectorBase, '/propel-track');
+        fetch(`${proxyUrl}?fbclid=${encodeURIComponent(clickId)}`, { redirect: 'manual' })
           .catch(() => {});
       }
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { shopifyFetch } from '../../lib/api';
+import { shopifyFetch, PLATFORM_PORTS } from '../../lib/api';
 import type { ShopifyShop } from '@shared/types/database';
 
 export function ShopifySettingsPage() {
@@ -233,18 +233,18 @@ export function ShopifySettingsPage() {
             </p>
             <pre className="text-xs text-foreground">
 {`SHOPIFY_WEBHOOK_SECRET=mock-webhook-secret
-SHOPIFY_SIMULATOR_URL=http://localhost:8807`}
+SHOPIFY_SIMULATOR_URL=http://localhost:${PLATFORM_PORTS['shopify']}`}
             </pre>
             <button
               onClick={() =>
                 copy(
-                  'SHOPIFY_WEBHOOK_SECRET=mock-webhook-secret\nSHOPIFY_SIMULATOR_URL=http://localhost:8807'
+                  `SHOPIFY_WEBHOOK_SECRET=mock-webhook-secret\nSHOPIFY_SIMULATOR_URL=http://localhost:${PLATFORM_PORTS['shopify']}`
                 )
               }
               className="mt-2 rounded border px-2 py-1 text-xs hover:bg-muted"
             >
               {copied ===
-              'SHOPIFY_WEBHOOK_SECRET=mock-webhook-secret\nSHOPIFY_SIMULATOR_URL=http://localhost:8807'
+              `SHOPIFY_WEBHOOK_SECRET=mock-webhook-secret\nSHOPIFY_SIMULATOR_URL=http://localhost:${PLATFORM_PORTS['shopify']}`
                 ? 'Copied'
                 : 'Copy All'}
             </button>

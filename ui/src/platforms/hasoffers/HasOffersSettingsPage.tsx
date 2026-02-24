@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { hasoffersFetch } from '../../lib/api';
+import { hasoffersFetch, PLATFORM_PORTS } from '../../lib/api';
 
 interface HoAccount {
   id: string;
@@ -11,7 +11,7 @@ interface HoAccount {
   status: string;
 }
 
-const BASE_URL = 'http://localhost:8810';
+const BASE_URL = `http://localhost:${PLATFORM_PORTS['hasoffers']}`;
 
 export function HasOffersSettingsPage() {
   const qc = useQueryClient();
@@ -77,7 +77,7 @@ export function HasOffersSettingsPage() {
           </div>
           <div className="flex items-center gap-3">
             <span className="w-32 font-medium text-muted-foreground">Port</span>
-            <code className="rounded bg-muted px-2 py-1">8810</code>
+            <code className="rounded bg-muted px-2 py-1">{PLATFORM_PORTS['hasoffers']}</code>
           </div>
         </div>
 

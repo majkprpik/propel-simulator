@@ -1,5 +1,7 @@
+import { PLATFORM_PORTS } from '../../lib/api';
+
 export async function clickbankFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const base = import.meta.env.DEV ? '/api/clickbank' : 'http://localhost:8808';
+  const base = import.meta.env.DEV ? '/api/clickbank' : `http://localhost:${PLATFORM_PORTS['clickbank']}`;
   const res = await fetch(`${base}${path}`, {
     ...options,
     headers: { 'Content-Type': 'application/json', ...options?.headers },

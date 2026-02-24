@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { getDb, testState, type AppType } from '../index';
 import { triggerPostbacks } from '../../../../shared/utils/postbacks';
+import { EVENT_UPSERT_CONFLICT } from '../../../../shared/utils/crud-factory';
 
 export const eventRoutes = new Hono<AppType>();
 
@@ -45,6 +46,27 @@ eventRoutes.post('/open_api/v1.3/event/track/', async (c) => {
     }
   }
 
+  // Collect all unique click IDs from events
+  const allClickIds = events
+    .map((e: Record<string, unknown>) => {
+      const userData = e.user_data as Record<string, unknown> | undefined;
+      return userData?.ttclid as string | null;
+    })
+    .filter((id: string | null): id is string => !!id);
+
+  // Batch query all click IDs at once
+  let validClickIds = new Set<string>();
+  if (allClickIds.length > 0) {
+    const { data: clicks } = await db
+      .from('mock_clicks')
+      .select('click_id')
+      .eq('platform', 'tiktok')
+      .in('click_id', allClickIds);
+    if (clicks) {
+      validClickIds = new Set(clicks.map((c: { click_id: string }) => c.click_id));
+    }
+  }
+
   const eventIds: string[] = [];
   const errors: Array<{ event_name: string; error: string }> = [];
   const postbackPromises: Promise<void>[] = [];
@@ -57,18 +79,9 @@ eventRoutes.post('/open_api/v1.3/event/track/', async (c) => {
 
     // Validate ttclid exists in mock_clicks if provided
     const clickId = event.user_data?.ttclid || null;
-    if (clickId) {
-      const { data: click } = await db
-        .from('mock_clicks')
-        .select('id')
-        .eq('platform', 'tiktok')
-        .eq('click_id', clickId)
-        .single();
-
-      if (!click) {
-        errors.push({ event_name: event.event_name || 'unknown', error: `click_id '${clickId}' not found in mock_clicks` });
-        continue;
-      }
+    if (clickId && !validClickIds.has(clickId)) {
+      errors.push({ event_name: event.event_name || 'unknown', error: `click_id '${clickId}' not found in mock_clicks` });
+      continue;
     }
 
     const effectivePixelId = pixelId || 'unknown';
@@ -89,7 +102,7 @@ eventRoutes.post('/open_api/v1.3/event/track/', async (c) => {
       request_payload: event,
     };
 
-    const { error } = await db.from('mock_events').upsert(record, { onConflict: 'platform,event_id' });
+    const { error } = await db.from('mock_events').upsert(record, { onConflict: EVENT_UPSERT_CONFLICT });
 
     if (error) {
       errors.push({ event_name: event.event_name || 'unknown', error: error.message });

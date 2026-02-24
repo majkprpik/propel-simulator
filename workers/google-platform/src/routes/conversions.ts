@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { getDb, testState, type AppType } from '../index';
 import { triggerPostbacks } from '../../../../shared/utils/postbacks';
 import { normalizeCurrency } from '../../../../shared/utils/currency';
+import { EVENT_UPSERT_CONFLICT } from '../../../../shared/utils/crud-factory';
 
 export const conversionRoutes = new Hono<AppType>();
 
@@ -91,7 +92,7 @@ conversionRoutes.post('/v17/customers/:customer_id\\:uploadClickConversions', as
       request_payload: conversion,
     };
 
-    const { error } = await db.from('mock_events').upsert(record, { onConflict: 'platform,event_id' });
+    const { error } = await db.from('mock_events').upsert(record, { onConflict: EVENT_UPSERT_CONFLICT });
 
     if (error) {
       errors.push({ index: i, error: error.message });

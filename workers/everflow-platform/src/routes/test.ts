@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
-import { testState, type AppType } from '../index';
+import { testState } from '../state';
+import type { AppType } from '../index';
 
 export const testRoutes = new Hono<AppType>();
 

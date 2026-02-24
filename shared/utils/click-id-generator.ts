@@ -1,3 +1,5 @@
+import type { Platform } from '../types/database';
+
 function randomBytes(length: number): Uint8Array {
   return crypto.getRandomValues(new Uint8Array(length));
 }
@@ -39,7 +41,7 @@ export function generateEfTransactionId(): string {
   return `ef_${toHex(randomBytes(8))}`;
 }
 
-export function generateClickId(platform: string): string {
+export function generateClickId(platform: Platform): string {
   switch (platform) {
     case 'facebook':
       return generateFbclid();

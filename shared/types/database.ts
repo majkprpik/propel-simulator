@@ -188,7 +188,7 @@ export interface ShopifyOrder {
   referring_site: string | null;
   source_name: string;
   financial_status: string;
-  line_items: unknown[];
+  line_items: Record<string, unknown>[];
   customer: Record<string, unknown>;
   webhook_fired_at: string | null;
   webhook_target_url: string | null;

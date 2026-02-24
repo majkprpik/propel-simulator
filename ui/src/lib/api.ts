@@ -1,84 +1,51 @@
 import type { Platform } from '@shared/types/database';
 
-const PLATFORM_PORTS: Partial<Record<Platform, number>> = {
+export const PLATFORM_PORTS: Record<Platform, number> = {
   facebook: 8801,
   google: 8802,
   tiktok: 8803,
   newsbreak: 8804,
   snapchat: 8805,
+  everflow: 8806,
+  shopify: 8807,
+  clickbank: 8808,
+  cake: 8809,
+  hasoffers: 8810,
 };
 
-const EVERFLOW_PORT = 8806;
-const SHOPIFY_PORT = 8807;
-const CLICKBANK_PORT = 8808;
-const CAKE_PORT = 8809;
-const HASOFFERS_PORT = 8810;
-
-function getEverflowBaseUrl(): string {
-  if (import.meta.env.DEV) return '/api/everflow';
-  return `http://localhost:${EVERFLOW_PORT}`;
-}
-
-function getShopifyBaseUrl(): string {
-  if (import.meta.env.DEV) return '/api/shopify';
-  return `http://localhost:${SHOPIFY_PORT}`;
-}
-
-function getClickBankBaseUrl(): string {
-  if (import.meta.env.DEV) return '/api/clickbank';
-  return `http://localhost:${CLICKBANK_PORT}`;
-}
-
-function getCakeBaseUrl(): string {
-  if (import.meta.env.DEV) return '/api/cake';
-  return `http://localhost:${CAKE_PORT}`;
-}
-
-function getHasOffersBaseUrl(): string {
-  if (import.meta.env.DEV) return '/api/hasoffers';
-  return `http://localhost:${HASOFFERS_PORT}`;
-}
-
-async function fetchHelper<T>(baseUrl: string, path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${baseUrl}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    ...options,
-  });
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error((error as { error?: string }).error || `Request failed: ${res.status}`);
-  }
-  return res.json();
-}
-
 export async function everflowFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  return fetchHelper<T>(getEverflowBaseUrl(), path, options);
+  return platformFetch<T>('everflow', path, options);
 }
 
 export async function shopifyFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  return fetchHelper<T>(getShopifyBaseUrl(), path, options);
+  return platformFetch<T>('shopify', path, options);
 }
 
 export async function clickbankFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  return fetchHelper<T>(getClickBankBaseUrl(), path, options);
+  return platformFetch<T>('clickbank', path, options);
 }
 
 export async function cakeFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  return fetchHelper<T>(getCakeBaseUrl(), path, options);
+  return platformFetch<T>('cake', path, options);
 }
 
 export async function hasoffersFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  return fetchHelper<T>(getHasOffersBaseUrl(), path, options);
+  return platformFetch<T>('hasoffers', path, options);
 }
 
 function getBaseUrl(platform: Platform): string {
-  // In dev, use Vite proxy
+  // Dev mode: use Vite proxy to avoid CORS issues
   if (import.meta.env.DEV) {
     return `/api/${platform}`;
   }
-  const port = PLATFORM_PORTS[platform];
-  if (port == null) throw new Error(`No port configured for platform: ${platform}`);
-  return `http://localhost:${port}/api`;
+  // Production: use env var override if available
+  const envKey = `VITE_${platform.toUpperCase()}_URL`;
+  const envUrl = import.meta.env[envKey] as string | undefined;
+  if (envUrl) {
+    return `${envUrl}/api`;
+  }
+  // Production fallback to hardcoded localhost ports
+  return `http://localhost:${PLATFORM_PORTS[platform]}/api`;
 }
 
 export async function platformFetch<T>(
@@ -111,15 +78,23 @@ export function createResource<T>(platform: Platform, resource: string, body: Re
 }
 
 export function getEvents(platform: Platform, pixelId?: string) {
-  const path = pixelId ? `/events/${pixelId}` : '/events';
+  const path = pixelId ? `/events?pixel_id=${pixelId}` : '/events';
   return platformFetch<{ data: unknown[]; total: number }>(platform, path);
 }
 
-export function listActiveAds(platform: Platform) {
+export function listActiveAds(platform: Platform, status = 'ACTIVE') {
   return platformFetch<{ data: import('@shared/types/database').MockAd[]; total: number }>(
     platform,
-    '/ads?status=ACTIVE'
+    `/ads?status=${status}`
   );
+}
+
+async function parseApiResponse<T>(res: Response, label: string): Promise<T> {
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error((err as { error?: string }).error || `${label} failed: ${res.status}`);
+  }
+  return res.json();
 }
 
 export async function sendConversionEvent({
@@ -159,7 +134,7 @@ export async function sendConversionEvent({
           access_token: pixel.access_token,
         }),
       });
-      return res.json();
+      return parseApiResponse(res, 'Facebook CAPI');
     }
 
     case 'google': {
@@ -184,7 +159,7 @@ export async function sendConversionEvent({
           ],
         }),
       });
-      return res.json();
+      return parseApiResponse(res, 'Google CAPI');
     }
 
     case 'tiktok': {
@@ -208,7 +183,7 @@ export async function sendConversionEvent({
           ],
         }),
       });
-      return res.json();
+      return parseApiResponse(res, 'TikTok CAPI');
     }
 
     case 'snapchat': {
@@ -228,7 +203,7 @@ export async function sendConversionEvent({
           currency: currency || 'USD',
         }),
       });
-      return res.json();
+      return parseApiResponse(res, 'Snapchat CAPI');
     }
 
     case 'newsbreak': {

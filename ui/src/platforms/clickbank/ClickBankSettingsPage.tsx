@@ -1,10 +1,9 @@
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { clickbankFetch } from '../../lib/api';
+import { clickbankFetch, PLATFORM_PORTS } from '../../lib/api';
 import type { CbAccount, CbPostbackConfig } from '@shared/types/database';
 
-const CLICKBANK_PORT = 8808;
-const BASE_URL = import.meta.env.DEV ? '/api/clickbank' : `http://localhost:${CLICKBANK_PORT}`;
+const BASE_URL = import.meta.env.DEV ? '/api/clickbank' : `http://localhost:${PLATFORM_PORTS['clickbank']}`;
 
 export function ClickBankSettingsPage() {
   const qc = useQueryClient();

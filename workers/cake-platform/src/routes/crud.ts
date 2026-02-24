@@ -1,21 +1,10 @@
 import { Hono } from 'hono';
 import { getDb, type AppType } from '../index';
+import { parsePagination, paginationRange } from '../../../../shared/utils/pagination';
+import { SUPABASE_NOT_FOUND } from '../../../../shared/utils/crud-factory';
+import { generateClickId } from '../../../../shared/utils/click-id-generator';
 
 export const crudRoutes = new Hono<AppType>();
-
-function generateClickId(): string {
-  const bytes = crypto.getRandomValues(new Uint8Array(8));
-  const hex = Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
-  return `cake_${hex}`;
-}
-
-function parsePagination(page: string | undefined, perPage: string | undefined) {
-  const p = Math.max(1, parseInt(page ?? '1', 10));
-  const pp = Math.min(100, Math.max(1, parseInt(perPage ?? '20', 10)));
-  return { page: p, perPage: pp, from: (p - 1) * pp, to: (p - 1) * pp + pp - 1 };
-}
 
 // ── Accounts ──────────────────────────────────────────────────────────────
 
@@ -64,7 +53,7 @@ crudRoutes.put('/api/accounts/:id', async (c) => {
     .select()
     .single();
   if (error) {
-    if (error.code === 'PGRST116') return c.json({ error: 'Not found' }, 404);
+    if (error.code === SUPABASE_NOT_FOUND) return c.json({ error: 'Not found' }, 404);
     return c.json({ error: error.message }, 500);
   }
   return c.json({ data });
@@ -74,12 +63,13 @@ crudRoutes.put('/api/accounts/:id', async (c) => {
 
 crudRoutes.get('/api/offers', async (c) => {
   const db = getDb(c);
-  const pag = parsePagination(c.req.query('page'), c.req.query('perPage'));
+  const pag = parsePagination({ page: c.req.query('page'), perPage: c.req.query('perPage') });
+  const [from, to] = paginationRange(pag);
   const { data, count, error } = await db
     .from('mock_cake_offers')
     .select('*', { count: 'exact' })
     .order('created_at', { ascending: false })
-    .range(pag.from, pag.to);
+    .range(from, to);
   if (error) return c.json({ error: error.message }, 500);
   return c.json({ data: data ?? [], total: count ?? 0, page: pag.page, perPage: pag.perPage });
 });
@@ -129,7 +119,7 @@ crudRoutes.put('/api/offers/:id', async (c) => {
     .select()
     .single();
   if (error) {
-    if (error.code === 'PGRST116') return c.json({ error: 'Not found' }, 404);
+    if (error.code === SUPABASE_NOT_FOUND) return c.json({ error: 'Not found' }, 404);
     return c.json({ error: error.message }, 500);
   }
   return c.json({ data });
@@ -145,7 +135,7 @@ crudRoutes.delete('/api/offers/:id', async (c) => {
     .select()
     .single();
   if (error) {
-    if (error.code === 'PGRST116') return c.json({ error: 'Not found' }, 404);
+    if (error.code === SUPABASE_NOT_FOUND) return c.json({ error: 'Not found' }, 404);
     return c.json({ error: error.message }, 500);
   }
   return c.json({ data });
@@ -155,12 +145,13 @@ crudRoutes.delete('/api/offers/:id', async (c) => {
 
 crudRoutes.get('/api/clicks', async (c) => {
   const db = getDb(c);
-  const pag = parsePagination(c.req.query('page'), c.req.query('perPage'));
+  const pag = parsePagination({ page: c.req.query('page'), perPage: c.req.query('perPage') });
+  const [from, to] = paginationRange(pag);
   const { data, count, error } = await db
     .from('mock_cake_clicks')
     .select('*, mock_cake_offers(offer_name)', { count: 'exact' })
     .order('clicked_at', { ascending: false })
-    .range(pag.from, pag.to);
+    .range(from, to);
   if (error) return c.json({ error: error.message }, 500);
   return c.json({ data: data ?? [], total: count ?? 0, page: pag.page, perPage: pag.perPage });
 });
@@ -182,7 +173,7 @@ crudRoutes.post('/api/clicks/generate', async (c) => {
   }
 
   const clicks = Array.from({ length: count }, () => ({
-    click_id: generateClickId(),
+    click_id: generateClickId('cake'),
     offer_id: offerId,
     sub_id: body.sub_id || null,
     destination_url: body.destination_url || 'https://example.com/lander',
@@ -206,7 +197,7 @@ crudRoutes.delete('/api/clicks/:id', async (c) => {
     .select()
     .single();
   if (error) {
-    if (error.code === 'PGRST116') return c.json({ error: 'Not found' }, 404);
+    if (error.code === SUPABASE_NOT_FOUND) return c.json({ error: 'Not found' }, 404);
     return c.json({ error: error.message }, 500);
   }
   return c.json({ data });
@@ -216,12 +207,13 @@ crudRoutes.delete('/api/clicks/:id', async (c) => {
 
 crudRoutes.get('/api/postbacks', async (c) => {
   const db = getDb(c);
-  const pag = parsePagination(c.req.query('page'), c.req.query('perPage'));
+  const pag = parsePagination({ page: c.req.query('page'), perPage: c.req.query('perPage') });
+  const [from, to] = paginationRange(pag);
   const { data, count, error } = await db
     .from('mock_cake_postbacks')
     .select('*', { count: 'exact' })
     .order('received_at', { ascending: false })
-    .range(pag.from, pag.to);
+    .range(from, to);
   if (error) return c.json({ error: error.message }, 500);
   return c.json({ data: data ?? [], total: count ?? 0, page: pag.page, perPage: pag.perPage });
 });
@@ -273,7 +265,7 @@ crudRoutes.delete('/api/postback-configs/:id', async (c) => {
     .select()
     .single();
   if (error) {
-    if (error.code === 'PGRST116') return c.json({ error: 'Not found' }, 404);
+    if (error.code === SUPABASE_NOT_FOUND) return c.json({ error: 'Not found' }, 404);
     return c.json({ error: error.message }, 500);
   }
   return c.json({ data });

@@ -10,6 +10,10 @@ const currencyField = z.string().refine(
 export const createAccountSchema = z.object({
   name: z.string().min(1, 'Account name is required').max(255),
   currency: currencyField,
+  // Status values vary by platform convention:
+  // - Facebook/Snapchat/NewsBreak use lowercase ('active', 'paused')
+  // - Google/TikTok use uppercase ('ENABLED', 'PAUSED')
+  // This shared schema accepts all variants; each worker applies its own defaults.
   status: z.enum(['active', 'paused', 'disabled', 'ACTIVE', 'ENABLED', 'PAUSED', 'DISABLED']).optional(),
   account_id: z.string().optional(),
 });
@@ -66,7 +70,7 @@ export type GenerateClickInput = z.infer<typeof generateClickSchema>;
 
 // --- Helper to format Zod errors ---
 export function formatZodErrors(error: z.ZodError): string[] {
-  return error.errors.map((e) => {
+  return error.issues.map((e) => {
     const path = e.path.length > 0 ? `${e.path.join('.')}: ` : '';
     return `${path}${e.message}`;
   });

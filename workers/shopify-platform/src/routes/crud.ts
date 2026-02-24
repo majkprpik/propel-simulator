@@ -1,13 +1,9 @@
 import { Hono } from 'hono';
 import { getDb, type AppType } from '../index';
+import { parsePagination, paginationRange } from '../../../../shared/utils/pagination';
+import { SUPABASE_NOT_FOUND } from '../../../../shared/utils/crud-factory';
 
 export const crudRoutes = new Hono<AppType>();
-
-function parsePagination(page: string | undefined, pageSize: string | undefined) {
-  const p = Math.max(1, parseInt(page ?? '1', 10));
-  const ps = Math.min(100, Math.max(1, parseInt(pageSize ?? '20', 10)));
-  return { page: p, pageSize: ps, from: (p - 1) * ps, to: (p - 1) * ps + ps - 1 };
-}
 
 // ── Shops ──────────────────────────────────────────────────────────────────
 
@@ -55,7 +51,7 @@ crudRoutes.put('/api/shops/:id', async (c) => {
     .select()
     .single();
   if (error) {
-    if (error.code === 'PGRST116') return c.json({ error: 'Not found' }, 404);
+    if (error.code === SUPABASE_NOT_FOUND) return c.json({ error: 'Not found' }, 404);
     return c.json({ error: error.message }, 500);
   }
   return c.json({ data });
@@ -71,7 +67,7 @@ crudRoutes.delete('/api/shops/:id', async (c) => {
     .select()
     .single();
   if (error) {
-    if (error.code === 'PGRST116') return c.json({ error: 'Not found' }, 404);
+    if (error.code === SUPABASE_NOT_FOUND) return c.json({ error: 'Not found' }, 404);
     return c.json({ error: error.message }, 500);
   }
   return c.json({ data });
@@ -81,14 +77,15 @@ crudRoutes.delete('/api/shops/:id', async (c) => {
 
 crudRoutes.get('/api/orders', async (c) => {
   const db = getDb(c);
-  const pag = parsePagination(c.req.query('page'), c.req.query('page_size'));
+  const pag = parsePagination({ page: c.req.query('page'), perPage: c.req.query('page_size') });
+  const [from, to] = paginationRange(pag);
   const { data, count, error } = await db
     .from('mock_shopify_orders')
     .select('*', { count: 'exact' })
     .order('created_at', { ascending: false })
-    .range(pag.from, pag.to);
+    .range(from, to);
   if (error) return c.json({ error: error.message }, 500);
-  return c.json({ data: data ?? [], total: count ?? 0, page: pag.page, pageSize: pag.pageSize });
+  return c.json({ data: data ?? [], total: count ?? 0, page: pag.page, pageSize: pag.perPage });
 });
 
 crudRoutes.post('/api/orders', async (c) => {
@@ -140,7 +137,7 @@ crudRoutes.put('/api/orders/:id', async (c) => {
     .select()
     .single();
   if (error) {
-    if (error.code === 'PGRST116') return c.json({ error: 'Not found' }, 404);
+    if (error.code === SUPABASE_NOT_FOUND) return c.json({ error: 'Not found' }, 404);
     return c.json({ error: error.message }, 500);
   }
   return c.json({ data });
@@ -156,7 +153,7 @@ crudRoutes.delete('/api/orders/:id', async (c) => {
     .select()
     .single();
   if (error) {
-    if (error.code === 'PGRST116') return c.json({ error: 'Not found' }, 404);
+    if (error.code === SUPABASE_NOT_FOUND) return c.json({ error: 'Not found' }, 404);
     return c.json({ error: error.message }, 500);
   }
   return c.json({ data });
@@ -181,7 +178,7 @@ crudRoutes.post('/api/orders/:id/fire-webhook', async (c) => {
     .single();
 
   if (orderError) {
-    if (orderError.code === 'PGRST116') return c.json({ error: 'Order not found' }, 404);
+    if (orderError.code === SUPABASE_NOT_FOUND) return c.json({ error: 'Order not found' }, 404);
     return c.json({ error: orderError.message }, 500);
   }
 

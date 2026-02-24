@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { getDb, testState, type AppType } from '../index';
 import { triggerPostbacks } from '../../../../shared/utils/postbacks';
+import { EVENT_UPSERT_CONFLICT } from '../../../../shared/utils/crud-factory';
 
 export const capiRoutes = new Hono<AppType>();
 
@@ -92,7 +93,7 @@ capiRoutes.post('/v2/conversion', async (c) => {
     request_payload: body,
   };
 
-  const { error } = await db.from('mock_events').upsert(record, { onConflict: 'platform,event_id' });
+  const { error } = await db.from('mock_events').upsert(record, { onConflict: EVENT_UPSERT_CONFLICT });
 
   if (error) {
     return c.json({

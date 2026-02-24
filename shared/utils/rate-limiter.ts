@@ -6,6 +6,10 @@
  *
  * Also supports a force-enable flag (via `isForceEnabled`) so the
  * test endpoints can toggle 429 responses for integration testing.
+ *
+ * NOTE: State is in-memory per isolate. In Cloudflare Workers, each isolate
+ * has independent state — this limit is per-isolate, not globally shared.
+ * For a simulator this is acceptable; a production rate limiter would use Durable Objects or KV.
  */
 import type { Context, Next } from 'hono';
 
