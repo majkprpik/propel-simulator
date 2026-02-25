@@ -44,7 +44,7 @@ export function ShopifyOrdersPage() {
   const qc = useQueryClient();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [fireModal, setFireModal] = useState<Order | null>(null);
-  const [targetUrl, setTargetUrl] = useState('http://localhost:8789/shopify/webhook');
+  const [targetUrl, setTargetUrl] = useState('http://localhost:3000/shopify/webhook');
   const [fireResult, setFireResult] = useState<{ status: number; body: string } | null>(null);
 
   const [form, setForm] = useState({
@@ -132,7 +132,7 @@ export function ShopifyOrdersPage() {
   function openFireModal(order: Order) {
     setFireModal(order);
     setFireResult(null);
-    setTargetUrl('http://localhost:8789/shopify/webhook');
+    setTargetUrl('http://localhost:3000/shopify/webhook');
   }
 
   return (

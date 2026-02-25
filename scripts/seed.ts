@@ -238,7 +238,7 @@ async function seedPlatform(db: SupabaseClient, opts: SeedOptions): Promise<void
           ad_group_id: adGroup.id,
           ad_id: adPlatformId,
           name: `Ad ${a + 1} (Seed)`,
-          destination_url: `https://example.com/${opts.platform}/landing-${c + 1}-${ag + 1}-${a + 1}`,
+          destination_url: `http://localhost:8790/p7jHD4WzOhUM9Qm0s4YK4A`,
           status: cfg.adStatus,
         });
         if (adErr) throw new Error(`Ad create failed: ${adErr.message}`);

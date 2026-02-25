@@ -188,13 +188,13 @@ export function ShopifySettingsPage() {
             </p>
             <div className="flex items-center gap-2">
               <code className="rounded bg-muted px-3 py-1.5">
-                POST http://localhost:8789/shopify/webhook
+                POST http://localhost:3000/shopify/webhook
               </code>
               <button
-                onClick={() => copy('http://localhost:8789/shopify/webhook')}
+                onClick={() => copy('http://localhost:3000/shopify/webhook')}
                 className="rounded border px-2 py-1 text-xs hover:bg-muted"
               >
-                {copied === 'http://localhost:8789/shopify/webhook' ? 'Copied' : 'Copy'}
+                {copied === 'http://localhost:3000/shopify/webhook' ? 'Copied' : 'Copy'}
               </button>
             </div>
           </div>

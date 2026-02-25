@@ -136,7 +136,7 @@ EVERFLOW_API_KEY=${primaryAccount?.api_key ?? 'mock-ef-api-key'}`}
           </label>
           <label className="col-span-full block">
             <span className="text-sm font-medium text-card-foreground">Postback URL</span>
-            <input value={pbForm.postback_url} onChange={(e) => setPbForm({ ...pbForm, postback_url: e.target.value })} className="mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:border-primary focus:outline-none" placeholder="http://localhost:8789/postback?..." />
+            <input value={pbForm.postback_url} onChange={(e) => setPbForm({ ...pbForm, postback_url: e.target.value })} className="mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:border-primary focus:outline-none" placeholder="http://localhost:3000/postback?..." />
           </label>
         </div>
         <button
