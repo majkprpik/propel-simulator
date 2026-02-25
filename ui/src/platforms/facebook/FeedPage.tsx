@@ -76,13 +76,10 @@ export function FacebookFeed() {
       });
       const clickId = (res.data as any).click_id;
 
-      // Register click in Propel via Vite proxy (avoids CORS)
-      if (ad.destination_url) {
-        const redirectorBase = import.meta.env.VITE_PROPEL_REDIRECTOR_URL || 'http://localhost:8790';
-        const proxyUrl = ad.destination_url.replace(redirectorBase, '/propel-track');
-        fetch(`${proxyUrl}?fbclid=${encodeURIComponent(clickId)}`, { redirect: 'manual' })
-          .catch(() => {});
-      }
+      // Register click in Propel redirector using a real campaign tracking ID
+      const trackingId = 'p7jHD4WzOhUM9Qm0s4YK4A'; // Test Campaign - Facebook Weight Loss
+      await fetch(`http://localhost:8790/${trackingId}?fbclid=${encodeURIComponent(clickId)}`, { mode: 'no-cors' })
+        .catch(() => {});
 
       setLanding({ ad, clickId });
     } catch {
