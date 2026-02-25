@@ -52,7 +52,7 @@ function AdPost({ ad, onClick }: { ad: MockAd; onClick: () => void }) {
 }
 
 export function FacebookFeed() {
-  const [landing, setLanding] = useState<{ ad: MockAd; clickId: string } | null>(null);
+  const [landing, setLanding] = useState<{ ad: MockAd; clickId: string; propelClickId: string | null } | null>(null);
 
   const ads = useQuery({
     queryKey: ['facebook', 'active-ads'],
@@ -76,17 +76,24 @@ export function FacebookFeed() {
       });
       const clickId = (res.data as any).click_id;
 
-      // Register click in Propel via Vite proxy (avoids CORS)
+      // Register click in Propel via Vite proxy and capture Propel's click_id from redirect
+      let propelClickId: string | null = null;
       if (ad.destination_url) {
-        const redirectorBase = import.meta.env.VITE_PROPEL_REDIRECTOR_URL || 'http://localhost:8790';
-        const proxyUrl = ad.destination_url.replace(redirectorBase, '/propel-track');
-        fetch(`${proxyUrl}?fbclid=${encodeURIComponent(clickId)}`, { redirect: 'manual' })
-          .catch(() => {});
+        try {
+          const redirectorBase = import.meta.env.VITE_PROPEL_REDIRECTOR_URL || 'http://localhost:8790';
+          const proxyUrl = ad.destination_url.replace(redirectorBase, '/propel-track');
+          const trackRes = await fetch(`${proxyUrl}?fbclid=${encodeURIComponent(clickId)}`);
+          const location = trackRes.headers.get('X-Redirect-Location') || '';
+          const locationUrl = new URL(location, window.location.origin);
+          propelClickId = locationUrl.searchParams.get('aff_sub')
+            || locationUrl.searchParams.get('click_id')
+            || null;
+        } catch {}
       }
 
-      setLanding({ ad, clickId });
+      setLanding({ ad, clickId, propelClickId });
     } catch {
-      setLanding({ ad, clickId: 'click_error' });
+      setLanding({ ad, clickId: 'click_error', propelClickId: null });
     }
   }
 
@@ -95,6 +102,7 @@ export function FacebookFeed() {
       <MockLandingPage
         ad={landing.ad}
         clickId={landing.clickId}
+        propelClickId={landing.propelClickId}
         platform="facebook"
         platformColor="#1877F2"
         onBack={() => setLanding(null)}

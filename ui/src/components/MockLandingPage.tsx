@@ -7,6 +7,7 @@ interface MockLandingPageProps {
   platform: Platform;
   ad: { ad_id: string; name: string; destination_url: string | null };
   clickId: string;
+  propelClickId?: string | null;
   platformColor: string;
   onBack: () => void;
 }
@@ -18,7 +19,7 @@ const CONVERSION_ACTIONS = [
   { name: 'CompleteRegistration' },
 ];
 
-export function MockLandingPage({ platform, ad, clickId, platformColor, onBack }: MockLandingPageProps) {
+export function MockLandingPage({ platform, ad, clickId, propelClickId, platformColor, onBack }: MockLandingPageProps) {
   const [status, setStatus] = useState<{ type: 'idle' | 'loading' | 'success' | 'error'; message?: string }>({ type: 'idle' });
 
   const pixels = useQuery({
@@ -44,7 +45,8 @@ export function MockLandingPage({ platform, ad, clickId, platformColor, onBack }
       });
 
       // Send conversion to Propel postback-handler (fire and forget)
-      const params = new URLSearchParams({ click_id: clickId });
+      const postbackClickId = propelClickId || clickId;
+      const params = new URLSearchParams({ click_id: postbackClickId });
       if (action.value != null) params.set('payout', String(action.value));
       fetch(`http://localhost:8789/postback?${params}`, { method: 'GET' }).catch(() => {});
 

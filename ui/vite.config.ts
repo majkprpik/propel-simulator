@@ -82,6 +82,25 @@ export default defineConfig(({ mode }) => {
           target: propelRedirector,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/propel-track/, ''),
+          // Intercept 302 redirects so the browser can read the Location header.
+          // fetch() with redirect:'manual' returns an opaque response where headers are hidden.
+          selfHandleResponse: true,
+          configure: (proxy) => {
+            proxy.on('proxyRes', (proxyRes, _req, res) => {
+              const status = proxyRes.statusCode || 200;
+              if (status >= 300 && status < 400) {
+                res.writeHead(200, {
+                  'Content-Type': 'text/plain',
+                  'X-Redirect-Location': proxyRes.headers.location || '',
+                });
+                res.end('');
+                proxyRes.resume();
+              } else {
+                res.writeHead(status, proxyRes.headers);
+                proxyRes.pipe(res);
+              }
+            });
+          },
         },
         '/capi/facebook': {
           target: fb,

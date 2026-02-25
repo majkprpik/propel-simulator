@@ -43,7 +43,7 @@ function AdArticle({ ad, onClick }: { ad: MockAd; onClick: () => void }) {
 }
 
 export function NewsBreakFeed() {
-  const [landing, setLanding] = useState<{ ad: MockAd; clickId: string } | null>(null);
+  const [landing, setLanding] = useState<{ ad: MockAd; clickId: string; propelClickId: string | null } | null>(null);
 
   const ads = useQuery({
     queryKey: ['newsbreak', 'active-ads'],
@@ -65,9 +65,26 @@ export function NewsBreakFeed() {
         ad_id: ad.ad_id,
         destination_url: ad.destination_url,
       });
-      setLanding({ ad, clickId: (res.data as any).click_id });
+      const clickId = (res.data as any).click_id;
+
+      // Register click in Propel via Vite proxy and capture Propel's click_id from redirect
+      let propelClickId: string | null = null;
+      if (ad.destination_url) {
+        try {
+          const redirectorBase = import.meta.env.VITE_PROPEL_REDIRECTOR_URL || 'http://localhost:8790';
+          const proxyUrl = ad.destination_url.replace(redirectorBase, '/propel-track');
+          const trackRes = await fetch(`${proxyUrl}?click_id=${encodeURIComponent(clickId)}`);
+          const location = trackRes.headers.get('X-Redirect-Location') || '';
+          const locationUrl = new URL(location, window.location.origin);
+          propelClickId = locationUrl.searchParams.get('aff_sub')
+            || locationUrl.searchParams.get('click_id')
+            || null;
+        } catch {}
+      }
+
+      setLanding({ ad, clickId, propelClickId });
     } catch {
-      setLanding({ ad, clickId: 'click_error' });
+      setLanding({ ad, clickId: 'click_error', propelClickId: null });
     }
   }
 
@@ -76,6 +93,7 @@ export function NewsBreakFeed() {
       <MockLandingPage
         ad={landing.ad}
         clickId={landing.clickId}
+        propelClickId={landing.propelClickId}
         platform="newsbreak"
         platformColor="#E53E3E"
         onBack={() => setLanding(null)}
